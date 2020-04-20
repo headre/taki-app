@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.myapplication.data.OkClient;
@@ -22,10 +23,20 @@ import com.example.myapplication.ui.login.LoginActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
+
+import android.widget.DatePicker;
+import android.widget.Toast;
+import java.util.Calendar;
+
 public class ScreenActivity extends AppCompatActivity{
   private Button screenButton, userButton,cinemaButton,searchButton;
   private String cookie,movieData,screenData;
+  private String date="";
   private LinearLayout covers,screens;
+  int year,month,day;
+  public  int tag=1;
+  DatePicker datePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +48,28 @@ public class ScreenActivity extends AppCompatActivity{
         searchButton = findViewById(R.id.search);
         covers = findViewById(R.id.covers);
         screens = findViewById(R.id.screens);
+
+
+      datePicker=findViewById(R.id.datePicker1);
+      ((LinearLayout) ((ViewGroup)datePicker.getChildAt(0)).getChildAt(0)).setVisibility(View.GONE);
+      Calendar calendar=Calendar.getInstance();
+      year=calendar.get(Calendar.YEAR);
+      month=calendar.get(Calendar.MONTH);
+      day=calendar.get(Calendar.DAY_OF_MONTH);
+
+      datePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
+        @Override
+        public void onDateChanged(DatePicker datePicker, int year1, int month1, int day1) {
+          
+          ScreenActivity.this.year=year1;
+          ScreenActivity.this.month=month1;
+          ScreenActivity.this.day=day1;
+          show(year,month,day);
+          date=String.valueOf(year)+'-'+String.valueOf(month)+'-'+String.valueOf(day);
+        }
+      });
+
+
 
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
         cookie = sharedPreferences.getString("cookie", "");
@@ -79,6 +112,34 @@ public class ScreenActivity extends AppCompatActivity{
         });
         init();
     }
+
+
+  private void show(int i, int i1, int i2) {
+    String  str=i+"年"+(1+i1)+"月"+i2+'日';
+    //用Toast显示变化后的日期
+    Toast.makeText(ScreenActivity.this,str,Toast.LENGTH_SHORT).show();
+  }
+
+
+  public void date_picker(View view)
+  {
+    change();
+  }
+
+  public void change(){
+    if (tag==0) {
+      LinearLayout off=findViewById(R.id.date_picker);
+      off.setVisibility(View.INVISIBLE);
+      tag=1;
+    }else{
+      LinearLayout off=findViewById(R.id.date_picker);
+      off.setVisibility(View.VISIBLE);
+      tag=0;
+    }
+  }
+
+
+
 
     private void init(){
       Thread t= new Thread(new Runnable() {
@@ -222,3 +283,6 @@ public class ScreenActivity extends AppCompatActivity{
       });
     }
 }
+
+
+

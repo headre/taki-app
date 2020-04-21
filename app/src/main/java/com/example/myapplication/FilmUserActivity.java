@@ -28,7 +28,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class FilmUserActivity extends AppCompatActivity {
-  private Button userButton, screenButton, searchButton, cinemaButton,logoutButton;
+  private Button userButton, screenButton, cinemaButton,logoutButton;
   private LinearLayout orders;
   private String cookie, orderList;
 
@@ -39,7 +39,7 @@ public class FilmUserActivity extends AppCompatActivity {
     screenButton = findViewById(R.id.screen);
     userButton = findViewById(R.id.user);
     cinemaButton = findViewById(R.id.cinema);
-    searchButton = findViewById(R.id.search);
+  
     orders = findViewById(R.id.orders);
     logoutButton =findViewById(R.id.logout);
 
@@ -76,13 +76,7 @@ public class FilmUserActivity extends AppCompatActivity {
       }
     });
 
-    searchButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Intent intent = new Intent(FilmUserActivity.this, FilmSearchActivity.class);
-        startActivity(intent);
-      }
-    });
+
 
     logoutButton.setOnClickListener(new View.OnClickListener() {
       @Override

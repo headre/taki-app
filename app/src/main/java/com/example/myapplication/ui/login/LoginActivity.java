@@ -34,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     private Button lButton,loginButton;
+    private TextView register;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         //跳过登录部分
@@ -48,6 +49,18 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
+        
+         register=findViewById(R.id.register);
+       // register.setMovementMethod(LinkMovementMethod.getInstance());
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //jump to films
+                Intent intent=new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+        
         lButton=findViewById(R.id.btnFilm);
         lButton.setOnClickListener(new View.OnClickListener() {
             @Override

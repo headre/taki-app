@@ -114,28 +114,8 @@ public class FilmActivity extends AppCompatActivity{
               startActivity(intent);
           }
         });
-        Button logout = findViewById(R.id.logout);
-        logout.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            Thread logout = new Thread(new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  new OkClient(cookie).logout();
-                } catch (IOException e) {
-                  e.printStackTrace();
-                }
-              }
-            });
-            logout.start();
-            SharedPreferences sharedPreferences = getSharedPreferences("login",MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove("cookie");
-            editor.commit();
-          }
-        });
-
+       
+      
         screenButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {

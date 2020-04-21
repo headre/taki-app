@@ -30,7 +30,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 
 public class ScreenActivity extends AppCompatActivity{
-  private Button screenButton, userButton,cinemaButton,searchButton;
+  private Button screenButton, userButton,cinemaButton;
   private String cookie,movieData,screenData;
   private String date="";
   private LinearLayout covers,screens;
@@ -45,7 +45,7 @@ public class ScreenActivity extends AppCompatActivity{
         screenButton =findViewById(R.id.screen);
         userButton = findViewById(R.id.user);
         cinemaButton = findViewById(R.id.cinema);
-        searchButton = findViewById(R.id.search);
+        
         covers = findViewById(R.id.covers);
         screens = findViewById(R.id.screens);
 
@@ -103,13 +103,7 @@ public class ScreenActivity extends AppCompatActivity{
           }
         });
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            Intent intent = new Intent(ScreenActivity.this,FilmSearchActivity.class);
-            startActivity(intent);
-          }
-        });
+        
         init();
     }
 

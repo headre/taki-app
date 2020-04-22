@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     private LoginViewModel loginViewModel;
     private Button lButton,loginButton;
     private TextView register;
+    public  int tag_P=1,tag_E=0;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         //跳过登录部分
@@ -56,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //jump to films
-                Intent intent=new Intent(LoginActivity.this, RegisterActivity.class);
+                Intent intent=new Intent(LoginActivity.this, .class);
                 startActivity(intent);
             }
         });
@@ -158,7 +160,34 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+ public void login_P(View view)
+    {
+        change_P();
+    }
+    public void login_E(View view)
+    {
+        change_E();
+    }
 
+    public void change_P() {
+        if (tag_P == 0) {
+            LinearLayout off = findViewById(R.id.input_phone);
+            off.setVisibility(View.INVISIBLE);
+            LinearLayout on = findViewById(R.id.input_email);
+            on.setVisibility(View.VISIBLE);
+            tag_P = 1;tag_E=0;
+        }
+    }
+
+    public void change_E() {
+        if (tag_E == 0) {
+            LinearLayout off = findViewById(R.id.input_email);
+            off.setVisibility(View.INVISIBLE);
+            LinearLayout on = findViewById(R.id.input_phone);
+            on.setVisibility(View.VISIBLE);
+            tag_E = 1;tag_P=0;
+        }
+    }
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience

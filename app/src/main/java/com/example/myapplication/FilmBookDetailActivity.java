@@ -39,15 +39,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FilmBookDetailActivity extends AppCompatActivity{
+public class FilmBookDetailActivity extends AppCompatActivity {
   private Button bookButton, freshButton;
-  private double TotalPrice,originalPrice;
+  private double TotalPrice, originalPrice;
   private String cookie = null, screenId = null;
-  private Integer row, col,count1=0;
+  private Integer row, col, count1 = 0;
   public static final int MAX_GRID = 56;
   private ArrayList<String> ticketSelected = new ArrayList<>();
   private ArrayList<HashMap> seatsOfAuditorium = null, seatsTaken = null;
-  private JSONObject movieData = null,screenData = null;
+  private JSONObject movieData = null, screenData = null;
   TextView showPrice;
 
   @Override
@@ -59,6 +59,27 @@ public class FilmBookDetailActivity extends AppCompatActivity{
     screenId = sharedPreferences.getString("id", "");
     bookButton = findViewById(R.id.book_Dbutton0);
     showPrice = findViewById(R.id.price_total);
+
+    UIInit();
+
+
+    bookButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = new Intent(FilmBookDetailActivity.this, FilmActivity.class);
+        startActivity(intent);
+      }
+    });
+    freshButton = findViewById(R.id.book_refresh);
+    freshButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        UIInit();
+      }
+    });
+  }
+
+  private void UIInit() {
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -82,24 +103,26 @@ public class FilmBookDetailActivity extends AppCompatActivity{
       }
     });
     t.start();
+
+
     Thread showMovieData = new Thread(new Runnable() {
       @Override
       public void run() {
-        try{
+        try {
           screenData = new JSONObject(new OkClient(cookie).getScreenInfo(screenId));
           originalPrice = screenData.getDouble("originalPrice");
           movieData = new JSONObject(new OkClient(cookie).getMovieInfo(screenData.getString("movieId")));
-          Log.e("movieData",movieData.toString());
+          Log.e("movieData", movieData.toString());
         } catch (JSONException e) {
           e.printStackTrace();
         }
         runOnUiThread(new Runnable() {
           @Override
           public void run() {
-            try{
-              Log.e("finish","");
+            try {
+              Log.e("finish", "");
               showMovieData();
-            }catch (Exception e){
+            } catch (Exception e) {
               e.printStackTrace();
             }
           }
@@ -108,22 +131,6 @@ public class FilmBookDetailActivity extends AppCompatActivity{
     });
     showMovieData.start();
 
-    bookButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Intent intent = new Intent(FilmBookDetailActivity.this, FilmActivity.class);
-        startActivity(intent);
-      }
-    });
-    freshButton = findViewById(R.id.book_refresh);
-    freshButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Intent intent = new Intent(FilmBookDetailActivity.this, FilmBookDetailActivity.class);
-        startActivity(intent);
-        finish();
-      }
-    });
   }
 
   public void dialog(View v) {
@@ -206,7 +213,7 @@ public class FilmBookDetailActivity extends AppCompatActivity{
   }
 
 
-  private void sendOrder(){
+  private void sendOrder() {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     Thread t = new Thread(new Runnable() {
@@ -214,9 +221,9 @@ public class FilmBookDetailActivity extends AppCompatActivity{
       public void run() {
         try {
           String orderInfo = new OkClient().sendTicket(ticketSelected, cookie, screenId);
-          Log.e("order",orderInfo);
+          Log.e("order", orderInfo);
           String id = new JSONObject(orderInfo).getString("id");
-          Log.e("id",id);
+          Log.e("id", id);
           editor.putString("recentOrderId", id);
           editor.commit();
         } catch (Exception e) {
@@ -235,11 +242,39 @@ public class FilmBookDetailActivity extends AppCompatActivity{
 
 
   private void init(Integer row, Integer col) {
+    ArrayList<Character> letters = new ArrayList<>();
+
     LinearLayout layout = findViewById(R.id.seats);
-    for(Integer i = 0; i < row; i++) {
+    for (Integer i = 0; i < row; i++) {
       layout.addView(newRow(i + 1, col));
     }
+    layout.addView(buttonBar(col));
+  }
 
+  private LinearLayout buttonBar(Integer col) {
+    LinearLayout line = new LinearLayout(FilmBookDetailActivity.this);
+
+    TextView header = new TextView(FilmBookDetailActivity.this);
+    LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dip2px(FilmBookDetailActivity.this, 43));
+    header.setGravity(Gravity.CENTER);
+    header.setTextSize(15);
+    header.setBackgroundResource(R.drawable.shape_screen);
+    header.setLayoutParams(textParams);
+    line.addView(header);
+
+    Character pos = 'A';
+    for (int i = 0; i < col; i++) {
+      TextView seat = new TextView(FilmBookDetailActivity.this);
+      LinearLayout.LayoutParams seatParams = new LinearLayout.LayoutParams(dip2px(FilmBookDetailActivity.this, 33), dip2px(FilmBookDetailActivity.this, 30), 1);
+      seatParams.setMargins(dip2px(FilmBookDetailActivity.this, 10), 0, 0, 0);
+      seat.setBackgroundResource(R.drawable.shape_screen);
+      seat.setGravity(Gravity.CENTER);
+      seat.setLayoutParams(seatParams);
+      seat.setText(pos.toString());
+      line.addView(seat);
+      pos++;
+    }
+    return line;
   }
 
   private LinearLayout newRow(Integer row, Integer col) {
@@ -253,17 +288,18 @@ public class FilmBookDetailActivity extends AppCompatActivity{
     header.setLayoutParams(textParams);
     header.setText(row.toString());
     line.addView(header);
+    /*
     if (col < 5) {
       col = 5;
-    }
+    }*/
     for (int i = 0; i < col; i++) {
-      Button seat = addSeat(row,i+1);
+      Button seat = addSeat(row, i + 1);
       line.addView(seat);
     }
     return line;
   }
 
-  private Button addSeat(Integer row,Integer col) {
+  private Button addSeat(Integer row, Integer col) {
     Button seat = new Button(FilmBookDetailActivity.this);
     LinearLayout.LayoutParams seatParams = new LinearLayout.LayoutParams(dip2px(FilmBookDetailActivity.this, 33), dip2px(FilmBookDetailActivity.this, 30), 1);
     seatParams.setMargins(dip2px(FilmBookDetailActivity.this, 10), 0, 0, 0);
@@ -272,12 +308,12 @@ public class FilmBookDetailActivity extends AppCompatActivity{
     seat.setLayoutParams(seatParams);
     JSONObject seatData = null;
     Integer seatId = 0;
-    final Boolean[] time = { false };
+    final Boolean[] time = {false};
 
-    for(HashMap<HashMap,JSONObject> seatPosAndInfo :seatsOfAuditorium){
-      HashMap<Integer,Integer> position = new HashMap<>();
-      position.put(row,col);
-      if(seatPosAndInfo.get(position)!=null){
+    for (HashMap<HashMap, JSONObject> seatPosAndInfo : seatsOfAuditorium) {
+      HashMap<Integer, Integer> position = new HashMap<>();
+      position.put(row, col);
+      if (seatPosAndInfo.get(position) != null) {
         seatData = seatPosAndInfo.get(position);
         seat.setBackgroundResource(R.drawable.seat_free);
         try {
@@ -285,16 +321,16 @@ public class FilmBookDetailActivity extends AppCompatActivity{
             seat.setBackgroundResource(R.drawable.vip);
           }
           seatId = seatData.getInt("id");
-        }catch (Exception e){
+        } catch (Exception e) {
           e.printStackTrace();
         }
       }
     }
 
-    for(HashMap<HashMap,JSONObject> seatPosAndInfo :seatsTaken){
-      HashMap<Integer,Integer> position = new HashMap<>();
-      position.put(row,col);
-      if(seatPosAndInfo.get(position)!=null){
+    for (HashMap<HashMap, JSONObject> seatPosAndInfo : seatsTaken) {
+      HashMap<Integer, Integer> position = new HashMap<>();
+      position.put(row, col);
+      if (seatPosAndInfo.get(position) != null) {
         seat.setBackgroundResource(R.drawable.seat_unable);
         seat.setClickable(false);
       }
@@ -302,22 +338,33 @@ public class FilmBookDetailActivity extends AppCompatActivity{
 
 
     Integer finalSeatId = seatId;
+    JSONObject finalSeatData = seatData;
     seat.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!time[0]){
+        if (!time[0]) {
           seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.seat_check));
           count1++;
-          ticketSelected.add("{\"ageType\":\"ADULT\",\"seatId\":"+finalSeatId.toString()+"}");
+          ticketSelected.add("{\"ageType\":\"ADULT\",\"seatId\":" + finalSeatId.toString() + "}");
           TotalPrice += originalPrice;
-          time[0]=true;
-        }else {
-          seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.seat_free));
+          time[0] = true;
+        } else {
+          try {
+            if (finalSeatData.getBoolean("isVip")) {
+              seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.vip));
+            }else {
+              seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.seat_free));
+            }
+
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
           count1--;
-          ticketSelected.remove("{\"ageType\":\"ADULT\",\"seatId\":"+finalSeatId.toString()+"}");
+          ticketSelected.remove("{\"ageType\":\"ADULT\",\"seatId\":" + finalSeatId.toString() + "}");
           TotalPrice -= originalPrice;
-          time[0]=false;
-        }Log.e("count",count1.toString());
+          time[0] = false;
+        }
+        Log.e("count", count1.toString());
 
         BigDecimal t = new BigDecimal(TotalPrice);
         showPrice.setText("Total Price: " + t.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
@@ -329,13 +376,13 @@ public class FilmBookDetailActivity extends AppCompatActivity{
   private void showMovieData() throws JSONException {
     ImageView cover = findViewById(R.id.cover);
     TextView title = findViewById(R.id.title);
-    TextView info =findViewById(R.id.info);
+    TextView info = findViewById(R.id.info);
 
     String coverName = movieData.getString("cover");
 
     title.setText(movieData.getString("name"));
-    info.setText("In "+screenData.getString("date")+"\nfrom "+screenData.getString("time")+" to "+screenData.getString("finishTime"));
-    if(coverName!="null"){
+    info.setText("In " + screenData.getString("date") + "\nfrom " + screenData.getString("time") + " to " + screenData.getString("finishTime"));
+    if (coverName != "null") {
       Thread m = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -355,6 +402,7 @@ public class FilmBookDetailActivity extends AppCompatActivity{
       m.start();
     }
   }
+
   private int dip2px(Context context, float dipValue) {
     Resources r = context.getResources();
     return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());

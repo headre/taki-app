@@ -98,16 +98,6 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/seat_end"
-            android:layout_width="350dp"
-            android:layout_height="18dp"
-            android:layout_below="@id/seats"
-            android:background="@drawable/shape_screen"
-            android:gravity="center"
-            android:text="  A         B         C         D         E         F         G         H"
-            android:textSize="14sp" />
-
 
         <TextView
             android:id="@+id/sit0"

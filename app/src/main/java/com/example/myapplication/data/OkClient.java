@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -294,6 +295,29 @@ public class OkClient {
         return result;
     }
 
+    public String screenSearch(String date,@Nullable String movie,@Nullable Integer page,@Nullable Integer contentCount){
+      if(movie==null){
+        movie="";
+      }if(page==null){
+        page=1;
+      }if(contentCount==null){
+        contentCount=10;
+      }
+      String params = "screenings/search?q="+date+"&m="+movie+"&p="+page+"&s="+contentCount;
+      OkHttpClient okHttpClient = new OkHttpClient();
+      Request request = new Request.Builder()
+        .url(url+params)
+        .build();
+      try {
+        result = okHttpClient.newCall(request).execute().body().string();
+        JSONObject object = new JSONObject(result);
+        result = new JSONObject(object.getString("screenings")).getString("content");
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+      return result;
+    }
+
     //获取影厅可用的所有座位
     public ArrayList<HashMap> GetAllSeat(String auditoriumId) {
       ArrayList<HashMap> seats = new ArrayList<>();
@@ -395,5 +419,56 @@ public class OkClient {
         .build();
       String result = okHttpClient.newCall(request).execute().body().string();
       return result;
+    }
+
+    public String register(String username, String email, String password,String id_code) throws Exception{
+      OkHttpClient okHttpClient = new OkHttpClient();
+      MediaType mediaType = MediaType.parse("application/json");
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("username",username);
+      jsonObject.put("email",email);
+      jsonObject.put("password",password);
+      jsonObject.put("idcode",id_code);
+      Log.e("body",jsonObject.toString());
+      RequestBody body = RequestBody.create(mediaType, jsonObject.toString());
+      Request request = new Request.Builder()
+        .url(url+"register")
+        .method("POST", body)
+        .addHeader("Content-Type", "application/json")
+        .build();
+      result = okHttpClient.newCall(request).execute().body().string();
+      Log.e("response",result);
+      return result;
+    }
+
+    public String sendIdCode(String email)throws Exception{
+      OkHttpClient okHttpClient = new OkHttpClient();
+      MediaType mediaType = MediaType.parse("application/json");
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("address",email);
+      RequestBody body = RequestBody.create(mediaType, jsonObject.toString());
+      Request request = new Request.Builder()
+        .url(url+"register/send")
+        .method("POST", body)
+        .addHeader("Content-Type", "application/json")
+        .build();
+      result = okHttpClient.newCall(request).execute().body().string();
+      Log.e("response",result);
+      return result;
+    }
+
+    public String refund(Integer id) throws  Exception{
+      OkHttpClient okHttpClient = new OkHttpClient();
+      MediaType mediaType = MediaType.parse("text/plain");
+      RequestBody body = RequestBody.create(mediaType, "");
+      Request request = new Request.Builder()
+        .url(url+"refund/"+id)
+        .addHeader("Cookie","JSESSIONID="+cookie)
+        .addHeader("Content-Type", "application/json")
+        .put(body)
+        .build();
+      result=okHttpClient.newCall(request).execute().body().string();
+      Log.e("response",result);
+      return  result;
     }
 }

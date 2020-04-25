@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,14 +17,17 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.LinearLayout;
 import android.widget.ArrayAdapter;
@@ -31,6 +35,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,12 +50,16 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 
-public class FilmActivity extends AppCompatActivity{
+public class FilmActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     private Button uButton,searchButton,cButton,screenButton;
     private EditText editText;
     private LinearLayout movielist;
     private String movieData,cookie;
+    private ScrollView scrollView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private int scrolly=0;
+    private Handler mHandler = new Handler(Looper.getMainLooper());
 
 
     @Override
@@ -62,6 +71,8 @@ public class FilmActivity extends AppCompatActivity{
         cButton = findViewById(R.id.cinema);
         screenButton = findViewById(R.id.screen);
         movielist = findViewById(R.id.movies_list);
+        scrollView = findViewById(R.id.scroll_view);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
 
         final Bitmap[] bitmap = {null};
 
@@ -69,6 +80,7 @@ public class FilmActivity extends AppCompatActivity{
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         cookie = sharedPreferences.getString("cookie", "");
+        swipeRefreshLayout.setOnRefreshListener(this);
         //初始化各种数据
         init();
 
@@ -114,8 +126,8 @@ public class FilmActivity extends AppCompatActivity{
               startActivity(intent);
           }
         });
-       
-      
+
+
         screenButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
@@ -152,7 +164,19 @@ public class FilmActivity extends AppCompatActivity{
           }
         });
         t.start();
+        scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+          @Override
+          public void onScrollChanged() {
+            View contentView = scrollView.getChildAt(0);
 
+            if(contentView.getMeasuredHeight()== scrollView.getScrollY() + scrollView.getHeight()){
+
+            }
+            swipeRefreshLayout.setEnabled(scrollView.getScrollY()==0);
+            if(scrollView.getScrollY()>0){
+            }
+          }
+        });
     }
     private LinearLayout setMovieLayout(String data) throws Exception {
       JSONObject movieData = new JSONObject(data);
@@ -252,5 +276,18 @@ public class FilmActivity extends AppCompatActivity{
       return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
     }
 
+
+  @Override
+  public void onRefresh() {
+    swipeRefreshLayout.setRefreshing(true);
+    init();
+    Log.e("fresh","finished");
+    mHandler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        swipeRefreshLayout.setRefreshing(false);
+      }
+    }, 1000);
+  }
 
 }

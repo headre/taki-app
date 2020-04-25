@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myapplication.data.OkClient;
 import com.example.myapplication.data.QRCodeUtil;
@@ -26,11 +27,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class FilmUserActivity extends AppCompatActivity {
-  private Button userButton, screenButton, cinemaButton,logoutButton;
+  private Button userButton, screenButton, cinemaButton, logoutButton, refundButton;
   private LinearLayout orders;
   private String cookie, orderList;
+  private Integer refund = 0;
+  private ArrayList<Integer> ticketsList = new ArrayList<>();
+  private final Integer maximumTickets = 3;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +47,10 @@ public class FilmUserActivity extends AppCompatActivity {
     screenButton = findViewById(R.id.screen);
     userButton = findViewById(R.id.user);
     cinemaButton = findViewById(R.id.cinema);
-  
+    refundButton = findViewById(R.id.refund);
+
     orders = findViewById(R.id.orders);
-    logoutButton =findViewById(R.id.logout);
+    logoutButton = findViewById(R.id.logout);
 
 
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
@@ -77,7 +86,6 @@ public class FilmUserActivity extends AppCompatActivity {
     });
 
 
-
     logoutButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -94,17 +102,23 @@ public class FilmUserActivity extends AppCompatActivity {
           }
         });
         t.start();
-        try{
+        try {
           t.join();
-        }catch (Exception e){
+        } catch (Exception e) {
           e.printStackTrace();
         }
-        Intent intent = new Intent(FilmUserActivity.this,LoginActivity.class);
+        Intent intent = new Intent(FilmUserActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
       }
     });
 
+    refundButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        refundTickets();
+      }
+    });
     init();
   }
 
@@ -152,14 +166,15 @@ public class FilmUserActivity extends AppCompatActivity {
 
     final String[] infoDetails = new String[1];
     final String[] Title = new String[1];
-    String date;
+    String date = null;
     String startTime;
     String finishTime;
     String validation;
     String ageType;
     String movieId;
     String totalCost;
-    Integer screenId, seatId, roomId;
+    Integer screenId, seatId, roomId, orderId;
+    orderId = order.getInt("id");
     totalCost = order.getString("totalCost");
     JSONArray tickets = new JSONArray(order.getString("tickets"));
     if (tickets != null) {
@@ -251,18 +266,97 @@ public class FilmUserActivity extends AppCompatActivity {
 
     orders.addView(orderLayout);
 
-    orderLayout.setClickable(true);
+    String finalDate = date;
     orderLayout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
+        String tips = null;
         if (click[0] < 1) {
-          orderLayout.setBackgroundColor(Color.parseColor("#03A9F4"));
-          click[0]++;
+          if (ticketsList.size() < maximumTickets) {
+            orderLayout.setBackgroundColor(Color.parseColor("#03A9F4"));
+            if(!refundOk(finalDate)){
+              refund--;
+            }else {
+              refund++;
+            }
+            ticketsList.add(orderId);
+            click[0]++;
+          } else {
+            tips = "you can only choose < "+maximumTickets.toString()+" tickets";
+            Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+          }
         } else {
+          if(!refundOk(finalDate)){
+            refund++;
+          }else {
+            refund--;
+          }
           orderLayout.setBackgroundColor(Color.parseColor("#ffffff"));
+          ticketsList.remove(orderId);
           click[0]--;
         }
+
+        Log.e("list", ticketsList.toString()+"  "+String.valueOf(refund));
       }
     });
   }
+
+  //根据票的放映日期判断是否可以退票
+  private Boolean refundOk(String date) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Boolean avail = false;
+    try {
+      Date today = sdf.parse(sdf.format(new Date()));
+      Date targetDate = sdf.parse(date);
+      if (today.getTime() < targetDate.getTime()) {
+        avail = true;
+      }
+      Log.e("refundOk", avail.toString());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return avail;
+  }
+
+  private void refundTickets() {
+    if (refund==0) {
+      String tips = "You haven't chosen any tickets";
+      Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+      toast.setGravity(Gravity.CENTER, 0, 0);
+      toast.show();
+    } else if(refund <maximumTickets) {
+      String tips = "THe tickets you chose has over date ones!";
+      Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+      toast.setGravity(Gravity.CENTER, 0, 0);
+      toast.show();
+    }else{
+        for (int i = 0; i < ticketsList.size(); i++) {
+          int finalI = i;
+          Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+              try {
+                new OkClient(cookie).refund(ticketsList.get(finalI));
+                if(finalI==ticketsList.size()-1){
+                  String tips = "refund successfully, all fees return to your accounts, please check";
+                  Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+                  toast.setGravity(Gravity.CENTER, 0, 0);
+                  toast.show();
+
+                  init();
+                }
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          });
+          t.start();
+        }
+        Log.e("refund", "finished");
+      }
+    }
+
 }

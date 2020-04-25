@@ -242,9 +242,9 @@ public class FilmBookDetailActivity extends AppCompatActivity {
 
 
   private void init(Integer row, Integer col) {
-    ArrayList<Character> letters = new ArrayList<>();
 
     LinearLayout layout = findViewById(R.id.seats);
+    layout.removeAllViews();
     for (Integer i = 0; i < row; i++) {
       layout.addView(newRow(i + 1, col));
     }
@@ -332,7 +332,7 @@ public class FilmBookDetailActivity extends AppCompatActivity {
       position.put(row, col);
       if (seatPosAndInfo.get(position) != null) {
         seat.setBackgroundResource(R.drawable.seat_unable);
-        seat.setClickable(false);
+        seat.setEnabled(false);
       }
     }
 

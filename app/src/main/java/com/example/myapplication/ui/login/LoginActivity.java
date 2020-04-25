@@ -28,6 +28,7 @@ import android.content.Intent;
 
 import com.example.myapplication.FilmActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.RegisterActivity;
 import com.example.myapplication.ui.login.LoginViewModel;
 import com.example.myapplication.ui.login.LoginViewModelFactory;
 
@@ -51,18 +52,18 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
-        
+
          register=findViewById(R.id.register);
        // register.setMovementMethod(LinkMovementMethod.getInstance());
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //jump to films
-                Intent intent=new Intent(LoginActivity.this, .class);
+                Intent intent=new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(intent);
             }
         });
-        
+
         lButton=findViewById(R.id.btnFilm);
         lButton.setOnClickListener(new View.OnClickListener() {
             @Override

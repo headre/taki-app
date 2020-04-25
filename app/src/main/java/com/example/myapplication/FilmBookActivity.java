@@ -53,13 +53,13 @@ public class FilmBookActivity extends AppCompatActivity {
     fbutton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Intent intent = new Intent(FilmBookActivity.this,FilmBookActivity.class);
-        startActivity(intent);
+        init();
       }
     });
   }
 
   private void init() {
+    screenlist.removeAllViews();
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     String movieId = sharedPreferences.getString("movie", "");

@@ -3,15 +3,18 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myapplication.data.OkClient;
 import com.example.myapplication.ui.login.LoginActivity;
@@ -21,8 +24,9 @@ import org.json.JSONObject;
 public class RegisterActivity extends AppCompatActivity {
     private Button button;
     private EditText email, username, password,id_code;
-    private String emailS, usernameS, passwordS,id_codeS;
+    private String emailS, usernameS, passwordS,id_codeS,response;
     private Button send_email, register_confirm;
+    private Integer emailOK=0,pwdOK=0,idcodeOK=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +38,81 @@ public class RegisterActivity extends AppCompatActivity {
         id_code = findViewById(R.id.id_code);
 
         send_email =findViewById(R.id.send_email);
+        send_email.setEnabled(false);
         register_confirm = findViewById(R.id.register_confirm);
+        register_confirm.setEnabled(false);
+
+        email.addTextChangedListener(new TextWatcher() {
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+          }
+
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+          }
+
+          @Override
+          public void afterTextChanged(Editable s) {
+              if(!(s.toString().indexOf("@") >0)){
+                email.setError("please enter 合适的格式");
+                emailOK=0;
+                send_email.setEnabled(false);
+              }else{
+                emailOK=1;
+                send_email.setEnabled(true);
+              }
+              listenOnEditFormat();
+          }
+        });
+
+        password.addTextChangedListener(new TextWatcher() {
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+          }
+
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+          }
+
+          @Override
+          public void afterTextChanged(Editable s) {
+            if(s.length()<6){
+              password.setError("password must be >6 characters");
+              pwdOK=0;
+            }else {
+              pwdOK=1;
+            }
+            listenOnEditFormat();
+          }
+        });
+
+        id_code.addTextChangedListener(new TextWatcher() {
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+          }
+
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+          }
+
+          @Override
+          public void afterTextChanged(Editable s) {
+              if(s.length()!=6){
+                id_code.setError("Id code must be 6 numbers");
+                idcodeOK=0;
+              }else {
+                idcodeOK=1;
+              }
+              listenOnEditFormat();
+          }
+        });
+
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +136,14 @@ public class RegisterActivity extends AppCompatActivity {
                 }catch (Exception e){
                   e.printStackTrace();
                 }
+                runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    Toast toast = Toast.makeText(RegisterActivity.this,R.string.idcode_sent,Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER,0,0);
+                    toast.show();
+                  }
+                });
               }
             });
             t.start();
@@ -77,18 +163,53 @@ public class RegisterActivity extends AppCompatActivity {
               }
             });
             t.start();
-            Intent intent = new Intent(RegisterActivity.this,LoginActivity.class);
-            startActivity(intent);
-            finish();
           }
         });
     }
 
     private void register(){
       try {
-        new OkClient().register(usernameS,emailS,passwordS,id_codeS);
+        response = new OkClient().register(usernameS,emailS,passwordS,id_codeS);
+        checkIfRegisterSuccess(response);
       } catch (Exception e) {
         e.printStackTrace();
+      }
+    }
+
+    private void listenOnEditFormat(){
+      if(emailOK==1&&pwdOK==1&&idcodeOK==1){
+        register_confirm.setEnabled(true);
+      }else {
+        register_confirm.setEnabled(false);
+      }
+    }
+
+    private void checkIfRegisterSuccess(String response) throws Exception{
+      JSONObject responseJSON = new JSONObject(response);
+      int tips;
+      Boolean success = false;
+      if(responseJSON.has("message")&&responseJSON.getString("message").equals(R.string.response_overdue)){
+        tips = R.string.toast_overdue;
+
+      }else if(responseJSON.has("error")){
+        tips = R.string.unknown_error;
+      }else{
+        tips = R.string.register_success;
+        success=true;
+      }
+      runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          Toast toast = Toast.makeText(RegisterActivity.this,tips,Toast.LENGTH_SHORT);
+          toast.setGravity(Gravity.CENTER,0,0);
+          toast.show();
+        }
+      });
+
+      if(success){
+        Intent intent = new Intent(RegisterActivity.this,LoginActivity.class);
+        startActivity(intent);
+        finish();
       }
     }
 }

@@ -10,9 +10,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Parcelable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -28,27 +25,35 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import com.example.myapplication.data.OkClient;
-import com.example.myapplication.data.ResolveJson;
 import com.example.myapplication.ui.login.LoginActivity;
-import com.example.myapplication.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-public class FilmBookDetailActivity extends AppCompatActivity {
-  private Button bookButton, freshButton;
-  private double TotalPrice, originalPrice;
-  private String cookie = null, screenId = null;
-  private Integer row, col, count1 = 0;
+public class FilmBookDetailActivity extends AppCompatActivity implements View.OnClickListener{
+  private Button bookButton, freshButton,adult,senior,child;
+  private double originalTotalPrice, originalPrice,discountedTotalPrice;
+  private String [] ageTypeList = {"ADULT","SENIOR","CHILD"};
+  private String cookie = null, screenId = null,ageType = ageTypeList[0];
+  private Integer row;
+  private Integer col;
+  private Integer count1 = 0;
+  private double discountMag=1;
   public static final int MAX_GRID = 56;
   private ArrayList<String> ticketSelected = new ArrayList<>();
   private ArrayList<HashMap> seatsOfAuditorium = null, seatsTaken = null;
   private JSONObject movieData = null, screenData = null;
+  public static int x,c;
+  private Boolean showDiscount = false;
   TextView showPrice;
+
+
+  public int[] count = new int[3];
+  public static Integer[] idB = new Integer[]{R.id.adult, R.id.senior, R.id.child};
+  Button[] sButtons = new Button[]{adult, senior, child};
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +67,18 @@ public class FilmBookDetailActivity extends AppCompatActivity {
 
     UIInit();
 
+
+    for (x = 0; x < 3; x++) {
+      sButtons[x] = findViewById(idB[x]);
+    }
+    for (x = 0; x < 3; x++) {
+      count[x] = 0;
+    }
+    for (x = 0; x < 3; x++) {
+      sButtons[x].setOnClickListener(this);
+    }
+    count[0]=1;
+    sButtons[0].setBackgroundDrawable(getResources().getDrawable(R.drawable.pay1));
 
     bookButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -110,6 +127,7 @@ public class FilmBookDetailActivity extends AppCompatActivity {
       public void run() {
         try {
           screenData = new JSONObject(new OkClient(cookie).getScreenInfo(screenId));
+          discountMag = screenData.getDouble("discountedMag");
           originalPrice = screenData.getDouble("originalPrice");
           movieData = new JSONObject(new OkClient(cookie).getMovieInfo(screenData.getString("movieId")));
           Log.e("movieData", movieData.toString());
@@ -345,8 +363,9 @@ public class FilmBookDetailActivity extends AppCompatActivity {
         if (!time[0]) {
           seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.seat_check));
           count1++;
-          ticketSelected.add("{\"ageType\":\"ADULT\",\"seatId\":" + finalSeatId.toString() + "}");
-          TotalPrice += originalPrice;
+          ticketSelected.add("{\"ageType\":"+ageType+",\"seatId\":" + finalSeatId.toString() + "}");
+          originalTotalPrice += originalPrice;
+          discountedTotalPrice+=originalPrice*discountMag;
           time[0] = true;
         } else {
           try {
@@ -360,17 +379,26 @@ public class FilmBookDetailActivity extends AppCompatActivity {
             e.printStackTrace();
           }
           count1--;
-          ticketSelected.remove("{\"ageType\":\"ADULT\",\"seatId\":" + finalSeatId.toString() + "}");
-          TotalPrice -= originalPrice;
+          ticketSelected.remove("{\"ageType\":"+ageType+",\"seatId\":" + finalSeatId.toString() + "}");
+          originalTotalPrice -= originalPrice;
+          discountedTotalPrice-=originalPrice*discountMag;
           time[0] = false;
         }
-        Log.e("count", count1.toString());
-
-        BigDecimal t = new BigDecimal(TotalPrice);
-        showPrice.setText("Total Price: " + t.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
+        if(originalTotalPrice<0){
+          originalTotalPrice=0;
+        }
+        if(discountedTotalPrice<0){
+          discountedTotalPrice=0;
+        }
+        showPrice();
       }
     });
     return seat;
+  }
+
+  private void showPrice(){
+    BigDecimal t = new BigDecimal(showDiscount?discountedTotalPrice:originalTotalPrice);
+    showPrice.setText("Total Price: " + t.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
   }
 
   private void showMovieData() throws JSONException {
@@ -406,6 +434,33 @@ public class FilmBookDetailActivity extends AppCompatActivity {
   private int dip2px(Context context, float dipValue) {
     Resources r = context.getResources();
     return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
+  }
+
+  @Override
+  public void onClick(View v) {
+    for (x = 0; x < 3; x++) {
+      if (v.getId() == idB[x]) break;
+    }
+    if (count[x] % 2 == 1) {
+      sButtons[x].setBackgroundDrawable(getResources().getDrawable(R.drawable.pay0));
+      count[x]--;
+
+    } else {
+      sButtons[x].setBackgroundDrawable(getResources().getDrawable(R.drawable.pay1));
+      ageType = ageTypeList[x];
+      if(ageType!=ageTypeList[0]){
+        showDiscount = true;
+      }else{
+        showDiscount =false;
+      }
+      for (c = 0; c < 3; c++) {
+        if (c != x)
+          sButtons[c].setBackgroundDrawable(getResources().getDrawable(R.drawable.pay0));
+        count[c]--;
+      }
+      count[x]++;
+    }
+    showPrice();
   }
 }
 

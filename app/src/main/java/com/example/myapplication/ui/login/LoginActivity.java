@@ -114,10 +114,6 @@ public class LoginActivity extends AppCompatActivity {
                     finish();
                 }
                 setResult(Activity.RESULT_OK);
-
-                //Complete and destroy login activity once successful
-                //删除此处代码防止登录失败后直接跳回桌面，虽然说成功跳了啥事没有，但还是以防万一将其转移
-                //finish();
             }
         });
 

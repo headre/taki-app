@@ -19,6 +19,8 @@ import com.example.myapplication.data.OkClient;
 import com.example.myapplication.data.ResolveJson;
 import com.example.myapplication.data.QRCodeUtil;
 import com.example.myapplication.ui.login.LoginActivity;
+import com.example.myapplication.FilmUserActivity;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;

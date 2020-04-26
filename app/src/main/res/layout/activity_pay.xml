@@ -232,10 +232,6 @@
                     android:background="@drawable/pay0" />
             </LinearLayout>
         </LinearLayout>
-
-
-
-
     </LinearLayout>
 
 

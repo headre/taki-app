@@ -480,8 +480,8 @@ public class OkClient {
         .build();
       MediaType mediaType = MediaType.parse("text/plain");
       RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-        .addFormDataPart("title", "email file test")
-        .addFormDataPart("body", "this is a email test")
+        .addFormDataPart("title", "Your ticket")
+        .addFormDataPart("body", "this is the movie ticket you want")
         .addFormDataPart("file","test.pdf",
           RequestBody.create(MediaType.parse("application/octet-stream"),
             file))

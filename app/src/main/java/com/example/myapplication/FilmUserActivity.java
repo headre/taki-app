@@ -67,7 +67,7 @@ public class FilmUserActivity extends AppCompatActivity {
     mailButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if (true) {
+        if (refund!=0) {
           String tips = "Tickets are being generated, please wait";
           Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_LONG);
           toast.setGravity(Gravity.CENTER, 0, 0);
@@ -208,8 +208,7 @@ public class FilmUserActivity extends AppCompatActivity {
     String ageType;
     String movieId;
     String totalCost;
-    Integer screenId, seatId, roomId, orderId;
-    orderId = order.getInt("id");
+    Integer seatId, roomId;
     totalCost = order.getString("totalCost");
     JSONArray tickets = new JSONArray(order.getString("tickets"));
     if (tickets != null) {
@@ -222,7 +221,7 @@ public class FilmUserActivity extends AppCompatActivity {
       finishTime = baseScreening.getString("finishTime");
       roomId = baseScreening.getInt("auditoriumId");
       movieId = baseScreening.getString("movieId");
-      infoDetails[0] = tickets.length() + " " + ageType + " tickets\nIn " + date + " from " + startTime + " to "
+      infoDetails[0] = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
         + finishTime + "\nRoom " + roomId.toString() + " seat \nTotalPrice: " + totalCost;
 
       for (int i = 0; i < tickets.length(); i++) {
@@ -383,11 +382,11 @@ public class FilmUserActivity extends AppCompatActivity {
       Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
       toast.setGravity(Gravity.CENTER, 0, 0);
       toast.show();
-    /*} else if(refund <maximumTickets) {
+    } else if(refund <maximumTickets) {
       String tips = "THe tickets you chose has over date ones!";
       Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
       toast.setGravity(Gravity.CENTER, 0, 0);
-      toast.show();*/
+      toast.show();
     }else{
         for (int i = 0; i < ticketsList.size(); i++) {
           int finalI = i;
@@ -423,12 +422,18 @@ public class FilmUserActivity extends AppCompatActivity {
     Log.e("path",path);
     path = "/data/data/com.example.myapplication";
     PdfDocument document = new PdfDocument();
-    Log.e("size, width, height", String.valueOf(layout.getWidth())+String.valueOf(layout.getHeight()));
+    Log.e("size, width, height", String.valueOf(layout.getWidth())+" "+String.valueOf(layout.getHeight()));
     PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(layout.getWidth(),layout.getHeight(),1).create();
     PdfDocument.Page page = document.startPage(pageInfo);
     layout.draw(page.getCanvas());
     document.finishPage(page);
     File file = new File(path+"/test.pdf");
+    FileOutputStream outputStream = new FileOutputStream(file);
+    try {
+      document.writeTo(outputStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     document.close();
     try{
       new OkClient(cookie).sendTicketToEmail(file);

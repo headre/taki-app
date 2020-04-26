@@ -29,7 +29,6 @@ import okhttp3.Response;
 public class LoginDataSource {
 
     public Result<LoggedInUser> login(final String username, final String password) {
-        final String url = "http://106.12.203.34:8080/login";
         final String[] user = {"none"};
         final boolean[] flag = {false};
         final String[] cookie = {"no cookie"};

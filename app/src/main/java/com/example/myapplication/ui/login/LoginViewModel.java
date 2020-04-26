@@ -66,9 +66,9 @@ public class LoginViewModel extends ViewModel {
     }
 
     // A placeholder password validation check
-    //这里为了测试管理员的3位数pwd密码，先设定为length>2
+    //这里为了测试管理员的6位数pwd密码，先设定为length>5
     private boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() > 2;
+        return password != null && password.trim().length() > 5;
     }
 
 }

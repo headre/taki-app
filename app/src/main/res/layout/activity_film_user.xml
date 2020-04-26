@@ -185,7 +185,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:gravity="center"
-            android:background="#ff0000"
+            android:background="#f1f1f1"
             android:text="refund"/>
         <Button
             android:id="@+id/email"
@@ -197,7 +197,7 @@
             android:layout_marginRight="10dp"
             android:gravity="center"
             android:background="#f1f1f1"
-            android:text="email"/>
+            android:text="print"/>
     </LinearLayout>
 
 

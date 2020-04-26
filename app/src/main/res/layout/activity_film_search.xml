@@ -155,22 +155,22 @@
 
         <Button
             android:id="@+id/cinema"
-            android:layout_width="70dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
             android:background="@drawable/film" />
 
         <Button
           android:id="@+id/screen"
-            android:layout_marginLeft="45dp"
-            android:layout_width="70dp"
+            android:layout_marginLeft="60dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:background="@drawable/screen" />
 
         <Button
             android:id="@+id/user"
-            android:layout_width="70dp"
-            android:layout_marginLeft="45dp"
+            android:layout_width="60dp"
+            android:layout_marginLeft="60dp"
             android:layout_height="wrap_content"
             android:background="@drawable/user"/>
     </LinearLayout>

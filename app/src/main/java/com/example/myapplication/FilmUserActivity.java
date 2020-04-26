@@ -1,11 +1,14 @@
 package com.example.myapplication;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.pdf.PdfDocument;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -26,6 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,13 +38,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class FilmUserActivity extends AppCompatActivity {
-  private Button userButton, screenButton, cinemaButton, logoutButton, refundButton;
-  private LinearLayout orders;
+  private Button userButton, screenButton, cinemaButton, logoutButton, refundButton,mailButton;
+  private LinearLayout orders,emailTicket;
   private String cookie, orderList;
   private Integer refund = 0;
   private ArrayList<Integer> ticketsList = new ArrayList<>();
-  private final Integer maximumTickets = 3;
+  private final Integer maximumTickets = 1;
 
+  @RequiresApi(api = Build.VERSION_CODES.KITKAT)
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -48,6 +54,7 @@ public class FilmUserActivity extends AppCompatActivity {
     userButton = findViewById(R.id.user);
     cinemaButton = findViewById(R.id.cinema);
     refundButton = findViewById(R.id.refund);
+    mailButton = findViewById(R.id.email);
 
     orders = findViewById(R.id.orders);
     logoutButton = findViewById(R.id.logout);
@@ -56,6 +63,34 @@ public class FilmUserActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie", "");
+
+    mailButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        if (true) {
+          String tips = "Tickets are being generated, please wait";
+          Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_LONG);
+          toast.setGravity(Gravity.CENTER, 0, 0);
+          toast.show();
+          Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+              try {
+                pdfModel(emailTicket);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          });
+          t.start();
+        }else{
+          String tips = "You haven't chosen any tickets";
+          Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+          toast.setGravity(Gravity.CENTER, 0, 0);
+          toast.show();
+        }
+      }
+    });
     screenButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -279,10 +314,20 @@ public class FilmUserActivity extends AppCompatActivity {
             }else {
               refund++;
             }
-            ticketsList.add(orderId);
+            for(int i =0;i<tickets.length();i++){
+              JSONObject ticket = null;
+              try {
+                ticket = tickets.getJSONObject(i);
+                Integer ticketId = ticket.getInt("id");
+                ticketsList.add(ticketId);
+              } catch (JSONException e) {
+                e.printStackTrace();
+              }
+            }
+            emailTicket = orderLayout;
             click[0]++;
           } else {
-            tips = "you can only choose < "+maximumTickets.toString()+" tickets";
+            tips = "you can only choose "+maximumTickets.toString()+" tickets";
             Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
@@ -293,12 +338,23 @@ public class FilmUserActivity extends AppCompatActivity {
           }else {
             refund--;
           }
+          emailTicket = null;
           orderLayout.setBackgroundColor(Color.parseColor("#ffffff"));
-          ticketsList.remove(orderId);
+          for(int i =0;i<tickets.length();i++){
+            JSONObject ticket = null;
+            try {
+              ticket = tickets.getJSONObject(i);
+              Integer ticketId = ticket.getInt("id");
+              ticketsList.remove(ticketId);
+            } catch (JSONException e) {
+              e.printStackTrace();
+            }
+
+          }
           click[0]--;
         }
 
-        Log.e("list", ticketsList.toString()+"  "+String.valueOf(refund));
+        Log.e("list", ticketsList.toString()+"  "+ refund);
       }
     });
   }
@@ -327,11 +383,11 @@ public class FilmUserActivity extends AppCompatActivity {
       Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
       toast.setGravity(Gravity.CENTER, 0, 0);
       toast.show();
-    } else if(refund <maximumTickets) {
+    /*} else if(refund <maximumTickets) {
       String tips = "THe tickets you chose has over date ones!";
       Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
       toast.setGravity(Gravity.CENTER, 0, 0);
-      toast.show();
+      toast.show();*/
     }else{
         for (int i = 0; i < ticketsList.size(); i++) {
           int finalI = i;
@@ -359,4 +415,34 @@ public class FilmUserActivity extends AppCompatActivity {
       }
     }
 
+
+
+  @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+  private void pdfModel(LinearLayout layout) throws  Exception{
+    String path = getApplicationContext().getFilesDir().getPath();
+    Log.e("path",path);
+    path = "/data/data/com.example.myapplication";
+    PdfDocument document = new PdfDocument();
+    Log.e("size, width, height", String.valueOf(layout.getWidth())+String.valueOf(layout.getHeight()));
+    PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(layout.getWidth(),layout.getHeight(),1).create();
+    PdfDocument.Page page = document.startPage(pageInfo);
+    layout.draw(page.getCanvas());
+    document.finishPage(page);
+    File file = new File(path+"/test.pdf");
+    document.close();
+    try{
+      new OkClient(cookie).sendTicketToEmail(file);
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        String tips = "ticket has been sent to your email box, please check";
+        Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+      }
+    });
+  }
 }

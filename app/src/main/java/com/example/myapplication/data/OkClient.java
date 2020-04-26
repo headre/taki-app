@@ -3,11 +3,13 @@ package com.example.myapplication.data;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import okhttp3.CookieJar;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -470,5 +473,26 @@ public class OkClient {
       result=okHttpClient.newCall(request).execute().body().string();
       Log.e("response",result);
       return  result;
+    }
+
+    public String sendTicketToEmail(File file) throws  Exception{
+      OkHttpClient client = new OkHttpClient().newBuilder()
+        .build();
+      MediaType mediaType = MediaType.parse("text/plain");
+      RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+        .addFormDataPart("title", "email file test")
+        .addFormDataPart("body", "this is a email test")
+        .addFormDataPart("file","test.pdf",
+          RequestBody.create(MediaType.parse("application/octet-stream"),
+            file))
+        .build();
+      Request request = new Request.Builder()
+        .url(url+"user/send")
+        .method("POST", body)
+        .addHeader("Cookie", "JSESSIONID="+cookie)
+        .build();
+      result= client.newCall(request).execute().body().string();
+      Log.e("response",result);
+      return result;
     }
 }

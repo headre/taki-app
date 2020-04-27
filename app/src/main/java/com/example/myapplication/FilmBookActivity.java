@@ -8,14 +8,15 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.LinearLayout;
+import android.widget.DatePicker;
+import java.util.Calendar;
 import com.example.myapplication.data.OkClient;
 import com.example.myapplication.data.pixelTools;
 
@@ -25,9 +26,13 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 public class FilmBookActivity extends AppCompatActivity {
-  private Button rbutton,fbutton;
+  private Button rbutton,fbutton,datePickButton;
   private String cookie = null;
   private LinearLayout screenlist;
+  public int tag = 1;
+  private String date = "";
+  int year, month, day;
+  DatePicker datePicker;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,31 @@ public class FilmBookActivity extends AppCompatActivity {
     setContentView(R.layout.activity_film_book);
     rbutton = findViewById(R.id._return);
     fbutton = findViewById(R.id._refresh);
+
+
+
+
+    datePicker = findViewById(R.id.datePicker1);
+    ((LinearLayout) ((ViewGroup) datePicker.getChildAt(0)).getChildAt(0)).setVisibility(View.GONE);
+    Calendar calendar = Calendar.getInstance();
+    year = calendar.get(Calendar.YEAR);
+    month = calendar.get(Calendar.MONTH);
+    day = calendar.get(Calendar.DAY_OF_MONTH);
+
+    datePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
+      @Override
+      public void onDateChanged(DatePicker datePicker, int year1, int month1, int day1) {
+        FilmBookActivity.this.year = year1;
+        FilmBookActivity.this.month = month1+1;
+        FilmBookActivity.this.day = day1;
+        //show(year, month, day);
+        date = String.valueOf(year) + '-' + String.valueOf(month) + '-' + String.valueOf(day);
+        LinearLayout off = findViewById(R.id.date_picker);
+        off.setVisibility(View.INVISIBLE);
+        tag = 1;
+      }
+    });
+
 
     screenlist = findViewById(R.id.screens_list);
     init();
@@ -57,6 +87,29 @@ public class FilmBookActivity extends AppCompatActivity {
       }
     });
   }
+
+
+
+
+  public void date_picker(View view) {
+    change();
+  }
+
+  public void change() {
+    if (tag == 0) {
+      LinearLayout off = findViewById(R.id.date_picker);
+      off.setVisibility(View.INVISIBLE);
+      tag = 1;
+    } else {
+      LinearLayout off = findViewById(R.id.date_picker);
+      off.setVisibility(View.VISIBLE);
+      tag = 0;
+    }
+  }
+
+
+
+
 
   private void init() {
     screenlist.removeAllViews();

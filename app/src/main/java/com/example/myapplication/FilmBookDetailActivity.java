@@ -273,17 +273,17 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     LinearLayout line = new LinearLayout(FilmBookDetailActivity.this);
 
     TextView header = new TextView(FilmBookDetailActivity.this);
-    LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dip2px(FilmBookDetailActivity.this, 43));
+    LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dip2px(FilmBookDetailActivity.this, 30));
     header.setGravity(Gravity.CENTER);
     header.setTextSize(15);
-    header.setBackgroundResource(R.drawable.shape_screen);
+    header.setBackgroundResource(R.color.grey);
     header.setLayoutParams(textParams);
     line.addView(header);
 
     Character pos = 'A';
     for (int i = 0; i < col; i++) {
       TextView seat = new TextView(FilmBookDetailActivity.this);
-      LinearLayout.LayoutParams seatParams = new LinearLayout.LayoutParams(dip2px(FilmBookDetailActivity.this, 33), dip2px(FilmBookDetailActivity.this, 30), 1);
+      LinearLayout.LayoutParams seatParams = new LinearLayout.LayoutParams(dip2px(FilmBookDetailActivity.this, 33), dip2px(FilmBookDetailActivity.this, 20), 1);
       seatParams.setMargins(dip2px(FilmBookDetailActivity.this, 10), 0, 0, 0);
       seat.setBackgroundResource(R.drawable.shape_screen);
       seat.setGravity(Gravity.CENTER);

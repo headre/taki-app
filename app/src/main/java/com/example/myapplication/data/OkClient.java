@@ -180,7 +180,7 @@ public class OkClient {
     private void getMovies() {
         okHttpClient = new OkHttpClient();
         final Request request = new Request.Builder()
-                .url(url)
+                .url(url+"?s=20")
                 .get()//默认就是GET请求
                 .build();
         Call call = okHttpClient.newCall(request);
@@ -194,7 +194,7 @@ public class OkClient {
     public void getScreenings(){
         okHttpClient = new OkHttpClient();
         final Request request = new Request.Builder()
-                .url(url)
+                .url(url+"?s=20")
                 .get()//默认就是GET请求
                 .build();
         Call call = okHttpClient.newCall(request);

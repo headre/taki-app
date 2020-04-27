@@ -163,8 +163,12 @@ public class ScreenActivity extends AppCompatActivity {
             try{
               screens.removeAllViews();
               JSONArray screensData = new JSONArray(screenData);
-              for (int i = 0; i < screensData.length(); i++) {
-                addNewScreen(screensData.getJSONObject(i));
+              if(screensData.length()<=0){
+
+              }else {
+                for (int i = 0; i < screensData.length(); i++) {
+                  addNewScreen(screensData.getJSONObject(i));
+                }
               }
             }catch (Exception e){
               e.printStackTrace();
@@ -177,6 +181,8 @@ public class ScreenActivity extends AppCompatActivity {
   }
 
   private void init() {
+    Date today = new Date(System.currentTimeMillis());
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(today);
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -193,9 +199,7 @@ public class ScreenActivity extends AppCompatActivity {
               for (int i = 0; i < moviesData.length(); i++) {
                 addNewMovie(moviesData.getJSONObject(i));
               }
-              for (int i = 0; i < screensData.length(); i++) {
-                addNewScreen(screensData.getJSONObject(i));
-              }
+              screenSearch(date);
             } catch (Exception e) {
               e.printStackTrace();
             }
@@ -257,6 +261,9 @@ public class ScreenActivity extends AppCompatActivity {
   }
 
   private void addNewScreen(JSONObject screenData) throws Exception {
+    Integer movieId = screenData.getInt("movieId");
+    Log.e("id",movieId.toString());
+
     int margin10 = pixelTools.dip2px(ScreenActivity.this, 10);
     int margin20 = pixelTools.dip2px(ScreenActivity.this, 20);
 
@@ -268,14 +275,32 @@ public class ScreenActivity extends AppCompatActivity {
     screenLayout.setBackgroundColor(Color.parseColor("#000000"));
     screenLayout.setLayoutParams(SLParams);
 
-    TextView time = new TextView(ScreenActivity.this);
-    LinearLayout.LayoutParams timeParams = new LinearLayout.LayoutParams(pixelTools.dip2px(ScreenActivity.this, 100), ViewGroup.LayoutParams.MATCH_PARENT, 4);
-    time.setBackgroundColor(Color.parseColor("#ffffff"));
-    time.setGravity(Gravity.CENTER);
-    time.setBackgroundColor(Color.parseColor("#ECECEC"));
-    time.setTextSize(20);
-    time.setLayoutParams(timeParams);
-    time.setText(screenData.getString("date"));
+
+    ImageView cover = new ImageView(ScreenActivity.this);
+    LinearLayout.LayoutParams coverParams = new LinearLayout.LayoutParams(pixelTools.dip2px(ScreenActivity.this, 100), ViewGroup.LayoutParams.MATCH_PARENT, 4);
+    cover.setImageResource(R.mipmap.ic_launcher_round);
+    cover.setBackgroundColor(Color.parseColor("#f1f1f1"));
+    cover.setLayoutParams(coverParams);
+      Thread m = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            JSONObject movie = new JSONObject(new OkClient().getMovieInfo(movieId.toString()));
+            String coverName = movie.getString("cover");
+            Log.e("cookie", cookie);
+            Bitmap bitmap = new OkClient(cookie).getImg(coverName);
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                cover.setImageBitmap(bitmap);
+              }
+            });
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      });
+      m.start();
 
 
     LinearLayout infoLayout = new LinearLayout(ScreenActivity.this);
@@ -293,11 +318,11 @@ public class ScreenActivity extends AppCompatActivity {
     info.setTextColor(Color.parseColor("#000000"));
     info.setTextSize(15);
     info.setLayoutParams(infoParams);
-    info.setText("from " + screenData.getString("time") + " to " + screenData.getString("finishTime") + "\nprice: " + screenData.getString("originalPrice"));
+    info.setText("In "+screenData.getString("date")+"\nfrom " + screenData.getString("time") + " to " + screenData.getString("finishTime") + "\nprice: " + screenData.getString("originalPrice"));
 
 
     infoLayout.addView(info);
-    screenLayout.addView(time);
+    screenLayout.addView(cover);
     screenLayout.addView(infoLayout);
 
     //把所有东西塞进layout中
@@ -317,6 +342,7 @@ public class ScreenActivity extends AppCompatActivity {
       }
     });
   }
+
 }
 
 

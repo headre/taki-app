@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import com.example.myapplication.data.OkClient;
 import com.example.myapplication.data.ResolveJson;
+import com.example.myapplication.data.pixelTools;
 import com.example.myapplication.ui.login.LoginActivity;
 
 import org.json.JSONArray;
@@ -193,17 +194,18 @@ public class FilmActivity extends AppCompatActivity implements SwipeRefreshLayou
 
       //设置相关margin和padding
       int margin = dip2px(FilmActivity.this,20);
+      int margin10 = pixelTools.dip2px(FilmActivity.this, 10);
       int lpadding = dip2px(FilmActivity.this,1);
       int tpadding = dip2px(FilmActivity.this,8);
 
 
       LinearLayout.LayoutParams lLayoutlayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,dip2px(FilmActivity.this,143));
-      lLayoutlayoutParams.setMargins(margin,0,margin,0);
+      lLayoutlayoutParams.setMargins(margin,margin10,margin,0);
       layout.setLayoutParams(lLayoutlayoutParams);
       // 设置属性
       layout.setBackgroundColor(Color.parseColor("#000000"));	//
-      layout.setPadding(0,lpadding,lpadding,lpadding);
-      layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setPadding(0, 0, 0, 1);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
 
       //以下为下载图片部分
       ImageView cover = new ImageView(FilmActivity.this);

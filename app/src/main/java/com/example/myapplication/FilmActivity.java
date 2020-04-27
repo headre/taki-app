@@ -146,18 +146,22 @@ public class FilmActivity extends AppCompatActivity implements SwipeRefreshLayou
             movieData=new OkClient().getMoviesData();
             try {
               JSONArray movies = new JSONArray(movieData);
-              for(int index=0;index<movies.length();index++){
-                JSONObject movie = movies.getJSONObject(index);
-                runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                    try {
-                      movielist.addView(setMovieLayout(movie.toString()));
-                    } catch (Exception e) {
-                      e.printStackTrace();
-                    }
+              if(movies.length()!=0) {
+                  for (int index = 0; index < movies.length(); index++) {
+                      JSONObject movie = movies.getJSONObject(index);
+                      runOnUiThread(new Runnable() {
+                          @Override
+                          public void run() {
+                              try {
+                                  movielist.addView(setMovieLayout(movie.toString()));
+                              } catch (Exception e) {
+                                  e.printStackTrace();
+                              }
+                          }
+                      });
                   }
-                });
+              }else{
+                  showNoData();
               }
             } catch (Exception e) {
               e.printStackTrace();
@@ -292,4 +296,16 @@ public class FilmActivity extends AppCompatActivity implements SwipeRefreshLayou
     }, 1000);
   }
 
+    private void showNoData(){
+        TextView nodata = new TextView(FilmActivity.this);
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);
+        nodata.setBackgroundColor(Color.parseColor("#ffffff"));
+        nodata.setGravity(Gravity.CENTER);
+        nodata.setTextColor(Color.parseColor("#000000"));
+        nodata.setTextSize(15);
+        nodata.setLayoutParams(infoParams);
+        nodata.setText("No movies");
+        movielist.addView(nodata);
+
+    }
 }

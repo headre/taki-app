@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.view.View;
 import android.view.ViewGroup;
@@ -127,10 +128,14 @@ public class FilmBookActivity extends AppCompatActivity {
             @Override
             public void run() {
               try {
-                for (int i = 0; i < screens.length(); i++) {
-                  JSONObject screen = screens.getJSONObject(i);
-                  screenlist.addView(setScreensLayout(screen.toString()));
+                if(screens.length()!=0) {
+                  for (int i = 0; i < screens.length(); i++) {
+                    JSONObject screen = screens.getJSONObject(i);
+                    screenlist.addView(setScreensLayout(screen.toString()));
 
+                  }
+                }else{
+                  showNoData();
                 }
                 setMovieInfo(movieInfo);
               } catch (Exception e) {
@@ -237,6 +242,18 @@ public class FilmBookActivity extends AppCompatActivity {
     });
 
     return layout;
+
+  }
+  private void showNoData(){
+    TextView nodata = new TextView(FilmBookActivity.this);
+    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);
+    nodata.setBackgroundColor(Color.parseColor("#ffffff"));
+    nodata.setGravity(Gravity.CENTER);
+    nodata.setTextColor(Color.parseColor("#000000"));
+    nodata.setTextSize(15);
+    nodata.setLayoutParams(infoParams);
+    nodata.setText("No screenings on this day");
+    screenlist.addView(nodata);
 
   }
 }

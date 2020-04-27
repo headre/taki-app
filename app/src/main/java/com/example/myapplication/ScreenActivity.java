@@ -164,7 +164,7 @@ public class ScreenActivity extends AppCompatActivity {
               screens.removeAllViews();
               JSONArray screensData = new JSONArray(screenData);
               if(screensData.length()<=0){
-
+                showNoData();
               }else {
                 for (int i = 0; i < screensData.length(); i++) {
                   addNewScreen(screensData.getJSONObject(i));
@@ -341,6 +341,19 @@ public class ScreenActivity extends AppCompatActivity {
         startActivity(intent);
       }
     });
+  }
+
+  private void showNoData(){
+    TextView nodata = new TextView(ScreenActivity.this);
+    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);
+    nodata.setBackgroundColor(Color.parseColor("#ffffff"));
+    nodata.setGravity(Gravity.CENTER);
+    nodata.setTextColor(Color.parseColor("#000000"));
+    nodata.setTextSize(15);
+    nodata.setLayoutParams(infoParams);
+    nodata.setText("No screenings on this day");
+    screens.addView(nodata);
+
   }
 
 }

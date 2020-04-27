@@ -239,7 +239,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal"
-        android:background="#f1f1f1"
+        android:background="#fff"
         android:padding="2px"
         android:layout_marginTop="30dp">
 

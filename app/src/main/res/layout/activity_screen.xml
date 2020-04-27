@@ -69,44 +69,17 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/today"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="20dp"
-                android:layout_marginLeft="4dp"
-                android:background="@color/date"
-                android:text="Today"
-                android:textColor="#000"
-                android:textSize="12sp" />
-            <Button
-                android:id="@+id/tomorrow"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="15dp"
-                android:layout_marginLeft="4dp"
-                android:layout_toRightOf="@+id/today"
-                android:background="@color/grey"
-                android:text="Tomorrow"
-                android:textColor="#000"
-                android:textSize="12sp" />
-
-            <Button
                 android:id="@+id/datepick"
                 android:onClick="date_picker"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:background="#f1f1f1"
-                android:layout_marginRight="20dp"
+                android:background="@color/date"
+                android:layout_marginLeft="20dp"
                 android:text="DATE"
                 android:textColor="#000"
                 android:textSize="12sp" />
 
         </RelativeLayout>
-
-
-
-
 
         <ScrollView
             android:id="@+id/screen_scroll"
@@ -115,6 +88,8 @@
             android:background="#fff"
             android:layout_marginTop="1dp"
             tools:context=".FilmActivity">
+
+
             <LinearLayout
                 android:id="@+id/screens"
                 android:layout_width="match_parent"
@@ -150,7 +125,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-
                             android:layout_width="250dp"
                             android:layout_height="match_parent"
                             android:layout_toRightOf="@id/fB0"
@@ -161,34 +135,28 @@
                             android:textAlignment="center"
                             android:textColor="#000000"
                             android:textSize="15sp" />
-
                     </LinearLayout>
                 </LinearLayout>
-
-
             </LinearLayout>
-
         </ScrollView>
+    </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/date_picker"
-            android:visibility="gone"
+    <LinearLayout
+        android:id="@+id/date_picker"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="345dp"
+        android:layout_gravity="center_horizontal"
+        android:background="#fff"
+        android:orientation="vertical"
+        android:layout_marginTop="-345dp">
+
+        <DatePicker
+            android:id="@+id/datePicker1"
             android:layout_width="match_parent"
-            android:layout_height="340dp"
-            android:layout_gravity="center_horizontal"
-            android:background="#fff"
-            android:orientation="vertical"
-            android:layout_marginTop="-300dp">
-
-            <DatePicker
-                android:id="@+id/datePicker1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="20dp">
-
-            </DatePicker>
-
-        </LinearLayout>
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp">
+        </DatePicker>
 
     </LinearLayout>
 
@@ -221,10 +189,6 @@
             android:layout_height="wrap_content"
             android:background="@drawable/user"/>
     </LinearLayout>
-
-
 </LinearLayout>
-
-
 
 

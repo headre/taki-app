@@ -69,14 +69,18 @@
 <LinearLayout
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:orientation="vertical">
+  android:orientation="vertical"
+    android:background="#f1f1f1">
    <HorizontalScrollView
+       android:layout_marginTop="20dp"
      android:id="@+id/HScrollView"
-     android:layout_width="wrap_content"
+     android:layout_width="match_parent"
      android:layout_height="wrap_content"
+       android:layout_gravity="center"
      android:background="#fff">
     <RelativeLayout
         android:id="@+id/seat"
+        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dp"
@@ -103,7 +107,7 @@
             android:id="@+id/sit0"
             android:layout_width="248dp"
             android:layout_height="40dp"
-            android:layout_marginLeft="51dp"
+            android:layout_marginLeft="48dp"
             android:layout_marginTop="40dp"
             android:background="@drawable/shape_screen"
             android:gravity="center"
@@ -127,7 +131,7 @@
       android:layout_height="30dp"
       android:layout_marginBottom="3dp"
       android:background="#fff"
-      android:gravity="center_horizontal"
+      android:gravity="left"
       android:text="Ticket Type"
       android:textColor="#000"
       android:textSize="20sp" />
@@ -150,14 +154,13 @@
           android:layout_height="match_parent"
           android:layout_weight="4"
           android:background="#fff"
-          android:gravity="center"
-          android:textAlignment="center"
+          android:gravity="left|center"
           android:textColor="#000000"
           android:textSize="15sp"
           android:text="ADULT"/>
         <Button
           android:id="@+id/adult"
-          android:layout_width="14dp"
+          android:layout_width="3dp"
           android:layout_height="match_parent"
           android:layout_weight="2"
           android:background="@drawable/pay0" />
@@ -184,15 +187,14 @@
           android:layout_height="match_parent"
           android:layout_weight="4"
           android:background="#fff"
-          android:gravity="center"
-          android:textAlignment="center"
+            android:gravity="left|center"
           android:textColor="#000000"
           android:textSize="15sp"
           android:text="SENIOR"/>
 
         <Button
           android:id="@+id/senior"
-          android:layout_width="14dp"
+          android:layout_width="3dp"
           android:layout_height="match_parent"
           android:layout_weight="2"
           android:background="@drawable/pay0" />
@@ -216,14 +218,14 @@
           android:layout_height="match_parent"
           android:layout_weight="4"
           android:background="#fff"
-          android:gravity="center"
-          android:textAlignment="center"
+
+            android:gravity="left|center"
           android:textColor="#000000"
           android:textSize="15sp"
           android:text="CHILD"/>
         <Button
           android:id="@+id/child"
-          android:layout_width="14dp"
+          android:layout_width="3dp"
           android:layout_height="match_parent"
           android:layout_weight="2"
           android:background="@drawable/pay0" />

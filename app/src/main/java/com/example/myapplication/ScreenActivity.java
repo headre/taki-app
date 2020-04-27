@@ -34,7 +34,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class ScreenActivity extends AppCompatActivity {
-  private Button screenButton, userButton, cinemaButton,todayButton,tomorrowButton,datePickButton;
+  private Button screenButton, userButton, cinemaButton,datePickButton;
   private String cookie, movieData, screenData;
   private String date = "";
   private LinearLayout covers, screens;
@@ -49,8 +49,7 @@ public class ScreenActivity extends AppCompatActivity {
     screenButton = findViewById(R.id.screen);
     userButton = findViewById(R.id.user);
     cinemaButton = findViewById(R.id.cinema);
-    todayButton = findViewById(R.id.today);
-    tomorrowButton = findViewById(R.id.tomorrow);
+   
     datePickButton =findViewById(R.id.datepick);
 
     covers = findViewById(R.id.covers);
@@ -84,46 +83,14 @@ public class ScreenActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     cookie = sharedPreferences.getString("cookie", "");
 
-    todayButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Date today = new Date(System.currentTimeMillis());
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(today);
-        Log.e("date",date);
-        todayOrTomorrowOrSearch =0;
-        todayButton.setBackgroundResource(R.color.date);
-        tomorrowButton.setBackgroundResource(R.color.grey);
-        datePickButton.setBackgroundResource(R.color.grey);
-        screenSearch(date);
-      }
-    });
-
-    tomorrowButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Date date = new Date(System.currentTimeMillis());
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.add(calendar.DATE,1);
-        date=calendar.getTime();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String dateString = formatter.format(date);
-        Log.e("tomorrow",dateString);
-        todayOrTomorrowOrSearch =1;
-        tomorrowButton.setBackgroundResource(R.color.date);
-        todayButton.setBackgroundResource(R.color.grey);
-        datePickButton.setBackgroundResource(R.color.grey);
-        screenSearch(dateString);
-      }
-    });
+   
 
     datePickButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         change();
         todayOrTomorrowOrSearch =2;
-        tomorrowButton.setBackgroundResource(R.color.grey);
-        todayButton.setBackgroundResource(R.color.grey);
+       
         datePickButton.setBackgroundResource(R.color.date);
       }
     });

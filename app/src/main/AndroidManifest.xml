@@ -19,15 +19,15 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity android:name=".FilmBookActivity" />
+   <activity android:name=".FilmBookActivity" android:label="Order"/>
     <activity android:name=".FilmActivity" />
-    <activity android:name=".FilmBookDetailActivity" />
-    <activity android:name=".FilmUserActivity" />
-    <activity android:name=".PayActivity" />
-    <activity android:name=".ScreenActivity" />
-    <activity android:name=".FilmSearchActivity" />
-    <activity android:name=".RegisterActivity" />
-    <activity android:name=".CodeActivity"/>
+    <activity android:name=".FilmBookDetailActivity" android:label="Order"/>
+    <activity android:name=".FilmUserActivity" android:label="User"/>
+    <activity android:name=".PayActivity" android:label="Pay"/>
+    <activity android:name=".ScreenActivity" android:label="Screen"/>
+    <activity android:name=".FilmSearchActivity" android:label="Search"/>
+    <activity android:name=".RegisterActivity" android:label="Register"/>
+    <activity android:name=".CodeActivity" android:label="Order"/>
   </application>
 
   <uses-permission android:name="android.permission.INTERNET" />

@@ -397,9 +397,14 @@ public class FilmUserActivity extends AppCompatActivity {
                 new OkClient(cookie).refund(ticketsList.get(finalI));
                 if(finalI==ticketsList.size()-1){
                   String tips = "refund successfully, all fees return to your accounts, please check";
-                  Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
-                  toast.setGravity(Gravity.CENTER, 0, 0);
-                  toast.show();
+                  runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                      Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+                      toast.setGravity(Gravity.CENTER, 0, 0);
+                      toast.show();
+                    }
+                  });
 
                   init();
                 }

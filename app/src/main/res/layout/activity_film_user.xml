@@ -330,6 +330,7 @@
                     android:textAlignment="center"
                     android:gravity="center_horizontal" />
             </LinearLayout>
+<<<<<<< HEAD
 
             <LinearLayout
                 android:layout_width="55dp"
@@ -354,7 +355,29 @@
 
 
             
+=======
+>>>>>>> 2536a3bc9d092ddb96cbbd63c7292aff63709d7f
 
+            <LinearLayout
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:background="#fff"
+                android:layout_marginLeft="104dp"
+                android:layout_marginTop="0dp"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/img10"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="gifts"
+                    android:textAlignment="center"
+                    android:gravity="center_horizontal" />
+            </LinearLayout>
 
         </RelativeLayout>
 
@@ -417,8 +440,11 @@
             </LinearLayout>
         </HorizontalScrollView>
         </LinearLayout>
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 2536a3bc9d092ddb96cbbd63c7292aff63709d7f
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="30dp"

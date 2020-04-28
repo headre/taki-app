@@ -32,8 +32,8 @@ import org.w3c.dom.Text;
 
 public class FilmBookActivity extends AppCompatActivity {
   private Button rbutton,fbutton,datePickButton;
-  private String cookie = null,movieId;
-  private LinearLayout screenlist;
+  private String cookie = null,movieId,movieData;
+  private LinearLayout screenlist,covers;
   public int tag = 1;
   private String date = "";
   int year, month, day;
@@ -50,7 +50,7 @@ public class FilmBookActivity extends AppCompatActivity {
     setContentView(R.layout.activity_film_book);
     rbutton = findViewById(R.id._return);
     fbutton = findViewById(R.id._refresh);
-
+    covers = findViewById(R.id.covers);
 
 
 
@@ -115,32 +115,54 @@ public class FilmBookActivity extends AppCompatActivity {
     }
   }
 
-  private void screenSearch(String date){
-    Thread t = new Thread(new Runnable() {
+  private void addNewMovie(JSONObject movieData) throws Exception {
+    ImageView cover = new ImageView(FilmBookActivity.this);
+    cover.setClickable(true);
+    LinearLayout.LayoutParams coverParams = new LinearLayout.LayoutParams(pixelTools.dip2px(FilmBookActivity.this, 100), ViewGroup.LayoutParams.MATCH_PARENT, 0);
+    coverParams.setMargins(pixelTools.dip2px(FilmBookActivity.this, 10), 0, 0, 0);
+    cover.setImageResource(R.mipmap.ic_launcher_round);
+    cover.setBackgroundColor(Color.parseColor("#f1f1f1"));
+    cover.setLayoutParams(coverParams);
+
+    String coverName = movieData.getString("cover");
+    String id = movieData.getString("id");
+
+    cover.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void run() {
-        String screenData = new OkClient().screenSearch(date,movieId,0,20);
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            try{
-              screenlist.removeAllViews();
-              JSONArray screensData = new JSONArray(screenData);
-              if(screensData.length()<=0){
-                showNoData();
-              }else {
-                for (int i = 0; i < screensData.length(); i++) {
-                  //addNewScreen(screensData.getJSONObject(i));
-                }
-              }
-            }catch (Exception e){
-              e.printStackTrace();
-            }
-          }
-        });
+      public void onClick(View v) {
+        SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("movie", id);
+        editor.commit();
+        Date today = new Date(System.currentTimeMillis());
+        date = new SimpleDateFormat("yyyy-MM-dd").format(today);
+        init(date);
+
       }
     });
-    t.start();
+
+
+    if (coverName != "null") {
+      Thread m = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Log.e("cookie", cookie);
+            Bitmap bitmap = new OkClient(cookie).getImg(coverName);
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                cover.setImageBitmap(bitmap);
+              }
+            });
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      });
+      m.start();
+    }
+    covers.addView(cover);
   }
 
 
@@ -150,6 +172,32 @@ public class FilmBookActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     movieId = sharedPreferences.getString("movie", "");
+    Thread m = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          movieData = new OkClient().getReleasedOrNotMovie(1);
+        }catch (Exception e){
+          e.printStackTrace();
+        }
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              covers.removeAllViews();
+              JSONArray moviesData = new JSONArray(movieData);
+              for (int i = 0; i < moviesData.length(); i++) {
+                addNewMovie(moviesData.getJSONObject(i));
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        });
+      }
+    });
+    m.start();
+
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {

@@ -186,7 +186,11 @@ public class ScreenActivity extends AppCompatActivity {
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
-        movieData = new OkClient().getMoviesData();
+        try {
+          movieData = new OkClient().getReleasedOrNotMovie(1);
+        }catch (Exception e){
+          e.printStackTrace();
+        }
         screenData = new OkClient().getScreensData();
         runOnUiThread(new Runnable() {
           @Override

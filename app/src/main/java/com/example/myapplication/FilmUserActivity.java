@@ -268,6 +268,9 @@ public class FilmUserActivity extends AppCompatActivity {
     LinearLayout orderLayout = new LinearLayout(FilmUserActivity.this);
     LinearLayout.LayoutParams OLParams = new LinearLayout.LayoutParams(pixelTools.dip2px(FilmUserActivity.this, 200), ViewGroup.LayoutParams.MATCH_PARENT);
     orderLayout.setBackgroundColor(Color.parseColor("#ffffff"));
+    if(Double.valueOf(totalCost)==0){
+      orderLayout.setBackgroundColor(Color.parseColor("#ff0000"));
+    }
     OLParams.setMargins(margin5, 0, 0, 0);
     orderLayout.setPadding(padding2, padding2, padding2, padding2);
     orderLayout.setGravity(Gravity.CENTER);
@@ -304,55 +307,61 @@ public class FilmUserActivity extends AppCompatActivity {
     orderLayout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        String tips = null;
-        if (click[0] < 1) {
-          if (ticketsList.size() < maximumTickets) {
-            orderLayout.setBackgroundColor(Color.parseColor("#03A9F4"));
-            if(!refundOk(finalDate)){
-              refund--;
-            }else {
-              refund++;
+        if(Double.valueOf(totalCost)!=0) {
+          String tips = null;
+          if (click[0] < 1) {
+            if (ticketsList.size() < maximumTickets) {
+              orderLayout.setBackgroundColor(Color.parseColor("#03A9F4"));
+              if (!refundOk(finalDate)) {
+                refund--;
+              } else {
+                refund++;
+              }
+              for (int i = 0; i < tickets.length(); i++) {
+                JSONObject ticket = null;
+                try {
+                  ticket = tickets.getJSONObject(i);
+                  Integer ticketId = ticket.getInt("id");
+                  ticketsList.add(ticketId);
+                } catch (JSONException e) {
+                  e.printStackTrace();
+                }
+              }
+              emailTicket = orderLayout;
+              click[0]++;
+            } else {
+              tips = "you can only choose " + maximumTickets.toString() + " tickets";
+              Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+              toast.setGravity(Gravity.CENTER, 0, 0);
+              toast.show();
             }
-            for(int i =0;i<tickets.length();i++){
+          } else {
+            if (!refundOk(finalDate)) {
+              refund++;
+            } else {
+              refund--;
+            }
+            emailTicket = null;
+            orderLayout.setBackgroundColor(Color.parseColor("#ffffff"));
+            for (int i = 0; i < tickets.length(); i++) {
               JSONObject ticket = null;
               try {
                 ticket = tickets.getJSONObject(i);
                 Integer ticketId = ticket.getInt("id");
-                ticketsList.add(ticketId);
+                ticketsList.remove(ticketId);
               } catch (JSONException e) {
                 e.printStackTrace();
               }
-            }
-            emailTicket = orderLayout;
-            click[0]++;
-          } else {
-            tips = "you can only choose "+maximumTickets.toString()+" tickets";
-            Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
-          }
-        } else {
-          if(!refundOk(finalDate)){
-            refund++;
-          }else {
-            refund--;
-          }
-          emailTicket = null;
-          orderLayout.setBackgroundColor(Color.parseColor("#ffffff"));
-          for(int i =0;i<tickets.length();i++){
-            JSONObject ticket = null;
-            try {
-              ticket = tickets.getJSONObject(i);
-              Integer ticketId = ticket.getInt("id");
-              ticketsList.remove(ticketId);
-            } catch (JSONException e) {
-              e.printStackTrace();
-            }
 
+            }
+            click[0]--;
           }
-          click[0]--;
+        }else{
+          String tips = "this ticket has been refunded";
+          Toast toast = Toast.makeText(FilmUserActivity.this, tips, Toast.LENGTH_SHORT);
+          toast.setGravity(Gravity.CENTER, 0, 0);
+          toast.show();
         }
-
         Log.e("list", ticketsList.toString()+"  "+ refund);
       }
     });

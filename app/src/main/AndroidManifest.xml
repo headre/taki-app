@@ -27,7 +27,7 @@
     <activity android:name=".ScreenActivity" android:label="Screen"/>
     <activity android:name=".FilmSearchActivity" android:label="Search"/>
     <activity android:name=".RegisterActivity" android:label="Register"/>
-    <activity android:name=".CodeActivity" android:label="Pay"/>
+    <activity android:name=".CodeActivity" android:label="Ticket"/>
       <activity android:name=".TicketActivity" android:label="tickets"/>
   </application>
 

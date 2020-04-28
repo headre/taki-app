@@ -314,7 +314,7 @@ public class OkClient {
       try {
         result = okHttpClient.newCall(request).execute().body().string();
         JSONObject object = new JSONObject(result);
-        if(movie!=null){
+        if(movie!=""){
             result = object.getString("content");
         }else {
             result = new JSONObject(object.getString("screenings")).getString("content");

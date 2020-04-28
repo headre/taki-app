@@ -1,112 +1,124 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
 import android.widget.LinearLayout;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myapplication.data.OkClient;
+import com.example.myapplication.data.ResolveJson;
 import com.example.myapplication.data.pixelTools;
 import com.example.myapplication.ui.login.LoginActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 
-import android.widget.DatePicker;
-import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-public class ScreenActivity extends AppCompatActivity {
-  private Button screenButton, userButton, cinemaButton,datePickButton;
-  private String cookie, movieData, screenData;
-  private String date = "";
-  private LinearLayout covers, screens;
-  int year, month, day;
-  public int tag = 1,todayOrTomorrowOrSearch=0;
-  DatePicker datePicker;
+  private Button uButton, searchButton, cButton, screenButton;
+  private EditText editText;
+  private LinearLayout movielist;
+  private String movieData, cookie;
+  private ScrollView scrollView;
+  private SwipeRefreshLayout swipeRefreshLayout;
+  private int scrolly = 0;
+  private Handler mHandler = new Handler(Looper.getMainLooper());
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_screen);
+    uButton = findViewById(R.id.user);
+    searchButton = findViewById(R.id.search_button);
+    cButton = findViewById(R.id.cinema);
     screenButton = findViewById(R.id.screen);
-    userButton = findViewById(R.id.user);
-    cinemaButton = findViewById(R.id.cinema);
-   
-    datePickButton =findViewById(R.id.datepick);
+    movielist = findViewById(R.id.movies_list);
+    scrollView = findViewById(R.id.scroll_view);
+    swipeRefreshLayout = findViewById(R.id.swipe_refresh);
 
-    covers = findViewById(R.id.covers);
-    screens = findViewById(R.id.screens);
+    final Bitmap[] bitmap = {null};
 
-
-    datePicker = findViewById(R.id.datePicker1);
-    ((LinearLayout) ((ViewGroup) datePicker.getChildAt(0)).getChildAt(0)).setVisibility(View.GONE);
-    Calendar calendar = Calendar.getInstance();
-    year = calendar.get(Calendar.YEAR);
-    month = calendar.get(Calendar.MONTH);
-    day = calendar.get(Calendar.DAY_OF_MONTH);
-
-    datePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
-      @Override
-      public void onDateChanged(DatePicker datePicker, int year1, int month1, int day1) {
-
-        ScreenActivity.this.year = year1;
-        ScreenActivity.this.month = month1+1;
-        ScreenActivity.this.day = day1;
-        //show(year, month, day);
-        date = String.valueOf(year) + '-' + String.valueOf(month) + '-' + String.valueOf(day);
-        screenSearch(date);
-        LinearLayout off = findViewById(R.id.date_picker);
-        off.setVisibility(View.INVISIBLE);
-        tag = 1;
-      }
-    });
-
-
+    //获取本地存储数据
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
+    SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie", "");
+    swipeRefreshLayout.setOnRefreshListener(this);
+    //初始化各种数据
+    init();
 
-   
-
-    datePickButton.setOnClickListener(new View.OnClickListener() {
+    //搜索模块
+    editText = findViewById(R.id.search_view);
+    searchButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        change();
-        todayOrTomorrowOrSearch =2;
-       
-        datePickButton.setBackgroundResource(R.color.date);
+        String keyword = editText.getText().toString();
+        OkClient okClient = new OkClient(cookie);
+        try {
+          Intent intent = new Intent(ScreenActivity.this, FilmSearchActivity.class);
+          intent.putExtra("keyword", keyword);
+          startActivity(intent);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
       }
     });
 
-    screenButton.setOnClickListener(new View.OnClickListener() {
+    cButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Intent intent = new Intent(ScreenActivity.this, ScreenActivity.class);
+        Intent intent = new Intent(ScreenActivity.this, FilmActivity.class);
         startActivity(intent);
       }
     });
 
-    userButton.setOnClickListener(new View.OnClickListener() {
+    //用户界面模块
+
+    uButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = null;
+        SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
+        String cookie = sharedPreferences.getString("cookie", "");
         if (cookie != null && cookie != "") {
           intent = new Intent(ScreenActivity.this, FilmUserActivity.class);
         } else {
@@ -116,118 +128,143 @@ public class ScreenActivity extends AppCompatActivity {
       }
     });
 
-    cinemaButton.setOnClickListener(new View.OnClickListener() {
+
+    screenButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Intent intent = new Intent(ScreenActivity.this, FilmActivity.class);
-        startActivity(intent);
+        init();
       }
     });
-
-
-    init();
   }
 
-
-  private void show(int i, int i1, int i2) {
-    String str = i + "年" + (1 + i1) + "月" + i2 + '日';
-    //用Toast显示变化后的日期
-    Toast.makeText(ScreenActivity.this, str, Toast.LENGTH_SHORT).show();
-  }
-
-
-  public void date_picker(View view) {
-    change();
-  }
-
-  public void change() {
-    if (tag == 0) {
-      LinearLayout off = findViewById(R.id.date_picker);
-      off.setVisibility(View.INVISIBLE);
-      tag = 1;
-    } else {
-      LinearLayout off = findViewById(R.id.date_picker);
-      off.setVisibility(View.VISIBLE);
-      tag = 0;
-    }
-  }
-
-  private void screenSearch(String date){
-    Thread t = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        screenData = new OkClient().screenSearch(date,null,0,20);
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            try{
-              screens.removeAllViews();
-              JSONArray screensData = new JSONArray(screenData);
-              if(screensData.length()<=0){
-                showNoData();
-              }else {
-                for (int i = 0; i < screensData.length(); i++) {
-                  addNewScreen(screensData.getJSONObject(i));
-                }
-              }
-            }catch (Exception e){
-              e.printStackTrace();
-            }
-          }
-        });
-      }
-    });
-    t.start();
-  }
-
+  //初始化界面
   private void init() {
-    Date today = new Date(System.currentTimeMillis());
-    String date = new SimpleDateFormat("yyyy-MM-dd").format(today);
+    movielist.removeAllViews();
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
         try {
           movieData = new OkClient().getReleasedOrNotMovie(1);
-        }catch (Exception e){
+          JSONArray movies = new JSONArray(movieData);
+          if (movies.length() != 0) {
+            for (int index = 0; index < movies.length(); index++) {
+              JSONObject movie = movies.getJSONObject(index);
+              runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    movielist.addView(setMovieLayout(movie.toString()));
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                  }
+                }
+              });
+            }
+          } else {
+            showNoData();
+          }
+        } catch (Exception e) {
           e.printStackTrace();
         }
-        screenData = new OkClient().getScreensData();
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              covers.removeAllViews();
-              screens.removeAllViews();
-              JSONArray moviesData = new JSONArray(movieData);
-              JSONArray screensData = new JSONArray(screenData);
-              for (int i = 0; i < moviesData.length(); i++) {
-                addNewMovie(moviesData.getJSONObject(i));
-              }
-              screenSearch(date);
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-          }
-        });
       }
     });
     t.start();
+    scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+      @Override
+      public void onScrollChanged() {
+        View contentView = scrollView.getChildAt(0);
 
+        if (contentView.getMeasuredHeight() == scrollView.getScrollY() + scrollView.getHeight()) {
+
+        }
+        swipeRefreshLayout.setEnabled(scrollView.getScrollY() == 0);
+        if (scrollView.getScrollY() > 0) {
+        }
+      }
+    });
   }
 
-  private void addNewMovie(JSONObject movieData) throws Exception {
-    ImageView cover = new ImageView(ScreenActivity.this);
-    cover.setClickable(true);
-    LinearLayout.LayoutParams coverParams = new LinearLayout.LayoutParams(pixelTools.dip2px(ScreenActivity.this, 100), ViewGroup.LayoutParams.MATCH_PARENT, 0);
-    coverParams.setMargins(pixelTools.dip2px(ScreenActivity.this, 10), 0, 0, 0);
-    cover.setImageResource(R.mipmap.ic_launcher_round);
-    cover.setBackgroundColor(Color.parseColor("#f1f1f1"));
-    cover.setLayoutParams(coverParams);
+  private LinearLayout setMovieLayout(String data) throws Exception {
+    JSONObject movieData = new JSONObject(data);
 
-    String coverName = movieData.getString("cover");
     String id = movieData.getString("id");
+    String name = movieData.getString("name");
+    String blurb = movieData.getString("blurb");
+    String covername = movieData.getString("cover");
+    String director = movieData.getString("director");
+    String duration = movieData.getString("duration");
 
-    cover.setOnClickListener(new View.OnClickListener() {
+    //新建最外层layout
+    LinearLayout layout = new LinearLayout(ScreenActivity.this);
+
+    //设置相关margin和padding
+    int margin = dip2px(ScreenActivity.this, 20);
+    int margin10 = pixelTools.dip2px(ScreenActivity.this, 10);
+    int lpadding = dip2px(ScreenActivity.this, 1);
+    int tpadding = dip2px(ScreenActivity.this, 8);
+
+
+    LinearLayout.LayoutParams lLayoutlayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dip2px(ScreenActivity.this, 143));
+    lLayoutlayoutParams.setMargins(margin, margin10, margin, 0);
+    layout.setLayoutParams(lLayoutlayoutParams);
+    // 设置属性
+    layout.setBackgroundColor(Color.parseColor("#000000"));    //
+    layout.setPadding(0, 0, 0, 1);
+    layout.setOrientation(LinearLayout.HORIZONTAL);
+
+    //以下为下载图片部分
+    ImageView cover = new ImageView(ScreenActivity.this);
+    LinearLayout.LayoutParams imgViewParams = new LinearLayout.LayoutParams(dip2px(ScreenActivity.this, 108), ViewGroup.LayoutParams.MATCH_PARENT, 4);
+    cover.setLayoutParams(imgViewParams);
+    cover.setImageResource(R.mipmap.ic_launcher_round);
+    cover.setBackgroundColor(Color.parseColor("#ECECEC"));
+    if (covername != "null") {
+      Thread m = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Log.e("cookie", cookie);
+            Bitmap bitmap = new OkClient(cookie).getImg(covername);
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                cover.setImageBitmap(bitmap);
+              }
+            });
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      });
+      m.start();
+    }
+
+    //设置文本
+    LinearLayout movieText = new LinearLayout(ScreenActivity.this);
+    LinearLayout.LayoutParams textBox = new LinearLayout.LayoutParams(dip2px(ScreenActivity.this, 265), ViewGroup.LayoutParams.MATCH_PARENT);
+    movieText.setPadding(tpadding, tpadding, tpadding, tpadding);
+    movieText.setOrientation(LinearLayout.VERTICAL);
+    movieText.setBackgroundColor(Color.parseColor("#ffffff"));
+    movieText.setGravity(Gravity.RIGHT);
+    movieText.setLayoutParams(textBox);
+
+    TextView context = new TextView(ScreenActivity.this);
+    LinearLayout.LayoutParams contextparams = new LinearLayout.LayoutParams(dip2px(ScreenActivity.this, 250), ViewGroup.LayoutParams.MATCH_PARENT, 8);
+    context.setBackgroundColor(Color.parseColor("#ffffff"));
+    context.setGravity(Gravity.CENTER);
+    context.setTextColor(Color.parseColor("#000000"));
+    context.setTextSize(18);
+    context.setLayoutParams(contextparams);
+    context.setText(name + "\n" + blurb);
+
+    movieText.addView(context);
+
+    //把所有东西塞进layout中
+    layout.addView(cover);
+    layout.addView(movieText);
+
+    layout.setClickable(true);
+    layout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
@@ -236,118 +273,31 @@ public class ScreenActivity extends AppCompatActivity {
         editor.commit();
         Intent intent = new Intent(ScreenActivity.this, FilmBookActivity.class);
         startActivity(intent);
-
       }
     });
-
-
-    if (coverName != "null") {
-      Thread m = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            Log.e("cookie", cookie);
-            Bitmap bitmap = new OkClient(cookie).getImg(coverName);
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                cover.setImageBitmap(bitmap);
-              }
-            });
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      });
-      m.start();
-    }
-    covers.addView(cover);
+    return layout;
   }
 
-  private void addNewScreen(JSONObject screenData) throws Exception {
-    Integer movieId = screenData.getInt("movieId");
-    Log.e("id",movieId.toString());
-
-    int margin10 = pixelTools.dip2px(ScreenActivity.this, 10);
-    int margin20 = pixelTools.dip2px(ScreenActivity.this, 20);
-
-    LinearLayout screenLayout = new LinearLayout(ScreenActivity.this);
-    LinearLayout.LayoutParams SLParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixelTools.dip2px(ScreenActivity.this, 80));
-    SLParams.setMargins(margin20, margin10, margin20, 0);
-    screenLayout.setPadding(0, 0, 0, 1);
-    screenLayout.setOrientation(LinearLayout.HORIZONTAL);
-    screenLayout.setBackgroundColor(Color.parseColor("#000000"));
-    screenLayout.setLayoutParams(SLParams);
+  private int dip2px(Context context, float dipValue) {
+    Resources r = context.getResources();
+    return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
+  }
 
 
-    ImageView cover = new ImageView(ScreenActivity.this);
-    LinearLayout.LayoutParams coverParams = new LinearLayout.LayoutParams(pixelTools.dip2px(ScreenActivity.this, 100), ViewGroup.LayoutParams.MATCH_PARENT, 4);
-    cover.setImageResource(R.mipmap.ic_launcher_round);
-    cover.setBackgroundColor(Color.parseColor("#f1f1f1"));
-    cover.setLayoutParams(coverParams);
-      Thread m = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            JSONObject movie = new JSONObject(new OkClient().getMovieInfo(movieId.toString()));
-            String coverName = movie.getString("cover");
-            Log.e("cookie", cookie);
-            Bitmap bitmap = new OkClient(cookie).getImg(coverName);
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                cover.setImageBitmap(bitmap);
-              }
-            });
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      });
-      m.start();
-
-
-    LinearLayout infoLayout = new LinearLayout(ScreenActivity.this);
-    LinearLayout.LayoutParams ILParams = new LinearLayout.LayoutParams(pixelTools.dip2px(ScreenActivity.this, 265), ViewGroup.LayoutParams.MATCH_PARENT);
-    infoLayout.setPadding(0, 0, 0, pixelTools.dip2px(ScreenActivity.this, 8));
-    infoLayout.setBackgroundColor(Color.parseColor("#ffffff"));
-    infoLayout.setOrientation(LinearLayout.HORIZONTAL);
-    infoLayout.setGravity(Gravity.RIGHT);
-    infoLayout.setLayoutParams(ILParams);
-
-    TextView info = new TextView(ScreenActivity.this);
-    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(pixelTools.dip2px(ScreenActivity.this, 250), ViewGroup.LayoutParams.MATCH_PARENT, 8);
-    info.setBackgroundColor(Color.parseColor("#ffffff"));
-    info.setGravity(Gravity.CENTER);
-    info.setTextColor(Color.parseColor("#000000"));
-    info.setTextSize(15);
-    info.setLayoutParams(infoParams);
-    info.setText("In "+screenData.getString("date")+"\nfrom " + screenData.getString("time") + " to " + screenData.getString("finishTime") + "\nprice: " + screenData.getString("originalPrice"));
-
-
-    infoLayout.addView(info);
-    screenLayout.addView(cover);
-    screenLayout.addView(infoLayout);
-
-    //把所有东西塞进layout中
-
-    screens.addView(screenLayout);
-    String id = screenData.getString("id");
-    screenLayout.setClickable(true);
-    screenLayout.setOnClickListener(new View.OnClickListener() {
+  @Override
+  public void onRefresh() {
+    swipeRefreshLayout.setRefreshing(true);
+    init();
+    Log.e("fresh", "finished");
+    mHandler.postDelayed(new Runnable() {
       @Override
-      public void onClick(View v) {
-        Intent intent = new Intent(ScreenActivity.this, FilmBookDetailActivity.class);
-        SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("id", id);
-        editor.commit();
-        startActivity(intent);
+      public void run() {
+        swipeRefreshLayout.setRefreshing(false);
       }
-    });
+    }, 1000);
   }
 
-  private void showNoData(){
+  private void showNoData() {
     TextView nodata = new TextView(ScreenActivity.this);
     LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);
     nodata.setBackgroundColor(Color.parseColor("#ffffff"));
@@ -355,12 +305,8 @@ public class ScreenActivity extends AppCompatActivity {
     nodata.setTextColor(Color.parseColor("#000000"));
     nodata.setTextSize(15);
     nodata.setLayoutParams(infoParams);
-    nodata.setText("No screenings on this day");
-    screens.addView(nodata);
+    nodata.setText("No movies");
+    movielist.addView(nodata);
 
   }
-
 }
-
-
-

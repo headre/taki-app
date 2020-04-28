@@ -1,194 +1,184 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="650dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:background="#fff"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:layout_marginTop="15dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_marginStart="15dp"
-                android:layout_width="138dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="4dp"
-                android:background="#fff"
-                android:text="Released Movies"
-                android:textColor="#000"
-                android:textSize="17sp" />
-
-        </RelativeLayout>
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:padding="10dp"
-            android:background="#f1f1f1"
-            android:paddingRight="10dp">
-
-
-            <LinearLayout
-                android:id="@+id/covers"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:background="#fff"
-                android:paddingRight="5dp"
-                android:padding="5dp">
-
-                <ImageView
-                    android:id="@+id/dir_1"
-                    android:layout_width="100dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#f1f1f1"
-                    android:src="@mipmap/ic_launcher"
-                    android:gravity="center"/>
-
-            </LinearLayout>
-        </HorizontalScrollView>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:background="#fff"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/datepick"
-                android:onClick="date_picker"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:background="@color/date"
-                android:layout_marginLeft="20dp"
-                android:text="DATE"
-                android:textColor="#000"
-                android:textSize="12sp" />
-
-        </RelativeLayout>
-
-        <ScrollView
-            android:id="@+id/screen_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#fff"
-            android:layout_marginTop="1dp"
-            tools:context=".FilmActivity">
-
-
-            <LinearLayout
-                android:id="@+id/screens"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                tools:context=".FilmActivity">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginLeft="20dp"
-                    android:background="#000000"
-                    android:orientation="horizontal"
-                    android:paddingBottom="1dp">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="4"
-                        android:gravity="center"
-                        android:background="#ECECEC"
-                        android:text="Time"
-                        android:textSize="20dp"/>
-
-                    <LinearLayout
-                        android:layout_width="265dp"
-                        android:layout_height="match_parent"
-                        android:gravity="right"
-                        android:padding="8dp"
-                        android:background="#ffffff"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="250dp"
-                            android:layout_height="match_parent"
-                            android:layout_toRightOf="@id/fB0"
-                            android:layout_weight="8"
-                            android:background="#fff"
-                            android:gravity="center"
-                            android:text="details"
-                            android:textAlignment="center"
-                            android:textColor="#000000"
-                            android:textSize="15sp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/date_picker"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="345dp"
-        android:layout_gravity="center_horizontal"
-        android:background="#fff"
-        android:orientation="vertical"
-        android:layout_marginTop="-345dp">
-
-        <DatePicker
-            android:id="@+id/datePicker1"
+        android:layout_height="match_parent">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="20dp">
-        </DatePicker>
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="650dp"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="#4A5BB5"
+                    android:orientation="horizontal">
 
-    </LinearLayout>
+                    <FrameLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content">
 
-    <LinearLayout
+                        <EditText
+                            android:id="@+id/search_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="10dp"
+                            android:background="#f0f0f0"
+                            android:drawablePadding="5dp"
+                            android:textSize="16sp"
+                            android:imeOptions="actionSearch"
+                            android:inputType="text"
+                            android:hint="Input"/>
+                        <ImageView
+                            android:background="@drawable/search_icon"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:visibility="visible"
+                            android:layout_marginRight="20dp"
+                            android:layout_gravity="right|center_vertical"/>
+                    </FrameLayout>
 
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="#4A5BB5"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+                    <Button
+                        android:id="@+id/search_button"
+                        android:layout_width="60dp"
+                        android:layout_height="19dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="#4A5BB5"
+                        android:text="Search"
+                        android:textColor="#fff" />
+                </LinearLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:orientation="vertical">
 
-        <Button
-            android:id="@+id/cinema"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="45dp"
-            android:background="@drawable/film" />
+                    <TextView
+                        android:id="@+id/fB_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#fff"
+                        android:layout_marginLeft="4dp"
+                        android:text="Hot Showing"
+                        android:textColor="#000"
+                        android:textSize="20sp" />
 
-        <Button
-            android:id="@+id/screen"
-            android:layout_marginLeft="60dp"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/screen" />
 
-        <Button
-            android:id="@+id/user"
-            android:layout_width="60dp"
-            android:layout_marginLeft="60dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/user"/>
-    </LinearLayout>
+                </RelativeLayout>
+
+                <ScrollView
+                    android:id="@+id/scroll_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#fff">
+
+
+                    <LinearLayout
+                        android:id="@+id/movies_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+
+
+
+
+
+                        <LinearLayout
+                            android:id="@+id/ll2"
+                            android:layout_width="match_parent"
+                            android:layout_height="139dp"
+                            android:layout_marginLeft="20dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_marginRight="20dp"
+                            android:background="#000000"
+                            android:orientation="horizontal"
+                            android:paddingBottom="1dp">
+
+                            <ImageView
+                                android:id="@+id/fB0"
+                                android:layout_width="108dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="4"
+                                android:background="#ECECEC" />
+
+                            <LinearLayout
+                                android:layout_width="265dp"
+                                android:layout_height="match_parent"
+                                android:background="#ffffff"
+                                android:gravity="right"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
+
+                                <TextView
+                                    android:id="@+id/tv"
+                                    android:layout_width="250dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="8"
+                                    android:background="#fff"
+                                    android:gravity="center"
+                                    android:textAlignment="center"
+                                    android:textColor="#000000"
+                                    android:textSize="18sp" />
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </ScrollView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="#4A5BB5"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/cinema"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="45dp"
+                    android:background="@drawable/film" />
+
+                <Button
+                    android:id="@+id/screen"
+                    android:layout_marginLeft="60dp"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/screen" />
+
+                <Button
+                    android:id="@+id/user"
+                    android:layout_width="60dp"
+                    android:layout_marginLeft="60dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/user"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>
+
+
 
 

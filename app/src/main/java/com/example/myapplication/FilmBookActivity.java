@@ -17,7 +17,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.LinearLayout;
 import android.widget.DatePicker;
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
 import com.example.myapplication.data.OkClient;
 import com.example.myapplication.data.pixelTools;
 
@@ -28,7 +32,7 @@ import org.w3c.dom.Text;
 
 public class FilmBookActivity extends AppCompatActivity {
   private Button rbutton,fbutton,datePickButton;
-  private String cookie = null;
+  private String cookie = null,movieId;
   private LinearLayout screenlist;
   public int tag = 1;
   private String date = "";
@@ -37,6 +41,8 @@ public class FilmBookActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    Date today = new Date(System.currentTimeMillis());
+    date = new SimpleDateFormat("yyyy-MM-dd").format(today);
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie","");
@@ -64,6 +70,7 @@ public class FilmBookActivity extends AppCompatActivity {
         //show(year, month, day);
         date = String.valueOf(year) + '-' + String.valueOf(month) + '-' + String.valueOf(day);
         LinearLayout off = findViewById(R.id.date_picker);
+        init(date);
         off.setVisibility(View.INVISIBLE);
         tag = 1;
       }
@@ -71,7 +78,7 @@ public class FilmBookActivity extends AppCompatActivity {
 
 
     screenlist = findViewById(R.id.screens_list);
-    init();
+    init(date);
     rbutton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -84,7 +91,7 @@ public class FilmBookActivity extends AppCompatActivity {
     fbutton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        init();
+        init(date);
       }
     });
   }
@@ -108,20 +115,47 @@ public class FilmBookActivity extends AppCompatActivity {
     }
   }
 
+  private void screenSearch(String date){
+    Thread t = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        String screenData = new OkClient().screenSearch(date,movieId,0,20);
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            try{
+              screenlist.removeAllViews();
+              JSONArray screensData = new JSONArray(screenData);
+              if(screensData.length()<=0){
+                showNoData();
+              }else {
+                for (int i = 0; i < screensData.length(); i++) {
+                  //addNewScreen(screensData.getJSONObject(i));
+                }
+              }
+            }catch (Exception e){
+              e.printStackTrace();
+            }
+          }
+        });
+      }
+    });
+    t.start();
+  }
 
 
 
-
-  private void init() {
+  private void init(String date) {
     screenlist.removeAllViews();
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
-    String movieId = sharedPreferences.getString("movie", "");
+    movieId = sharedPreferences.getString("movie", "");
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
         String movieInfo = new OkClient().getMovieInfo(movieId);
-        String movieScreens = new OkClient().getMovieScreen(movieId);
+        //String movieScreens = new OkClient().getMovieScreen(movieId);
+        String movieScreens = new OkClient().screenSearch(date,movieId,0,20);
         try {
           JSONArray screens = new JSONArray(movieScreens);
           runOnUiThread(new Runnable() {

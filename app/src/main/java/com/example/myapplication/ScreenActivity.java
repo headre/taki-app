@@ -156,7 +156,7 @@ public class ScreenActivity extends AppCompatActivity {
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
-        screenData = new OkClient().screenSearch(date,null,0,10);
+        screenData = new OkClient().screenSearch(date,null,0,20);
         runOnUiThread(new Runnable() {
           @Override
           public void run() {

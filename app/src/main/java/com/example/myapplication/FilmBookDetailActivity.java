@@ -41,9 +41,9 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
   private Integer row;
   private Integer col;
   private Integer count1 = 0;
-  private double discountMag=1;
+  private double discountMag=1,vipExtraPrice = 0;
   public static final int MAX_GRID = 56;
-  private ArrayList<String> ticketSelected = new ArrayList<>();
+  private ArrayList<String> ticketSelected = new ArrayList<>(),ticketsString = new ArrayList<>();
   private ArrayList<HashMap> seatsOfAuditorium = null, seatsTaken = null;
   private JSONObject movieData = null, screenData = null;
   public static int x,c;
@@ -127,11 +127,15 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
       public void run() {
         try {
           screenData = new JSONObject(new OkClient(cookie).getScreenInfo(screenId));
+          String auditoriumInfo=new OkClient(cookie).getAuditoriumInfo(screenData.getString("auditoriumId"));
+          vipExtraPrice = new JSONObject(auditoriumInfo).getDouble("vipExtraPrice");
           discountMag = screenData.getDouble("discountedMag");
           originalPrice = screenData.getDouble("originalPrice");
           movieData = new JSONObject(new OkClient(cookie).getMovieInfo(screenData.getString("movieId")));
           Log.e("movieData", movieData.toString());
         } catch (JSONException e) {
+          e.printStackTrace();
+        } catch (Exception e) {
           e.printStackTrace();
         }
         runOnUiThread(new Runnable() {
@@ -234,11 +238,14 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
   private void sendOrder() {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
+    for(String ticketId:ticketSelected){
+      ticketsString.add("{\"ageType\":"+"\""+ageType+"\""+",\"seatId\":" + ticketId + "}");
+    }
     Thread t = new Thread(new Runnable() {
       @Override
       public void run() {
         try {
-          String orderInfo = new OkClient().sendTicket(ticketSelected, cookie, screenId);
+          String orderInfo = new OkClient().sendTicket(ticketsString, cookie, screenId);
           Log.e("order", orderInfo);
           String id = new JSONObject(orderInfo).getString("id");
           Log.e("id", id);
@@ -336,7 +343,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
         seat.setBackgroundResource(R.drawable.seat_free);
         try {
           if (seatData.getBoolean("isVip")) {
-            seat.setBackgroundResource(R.drawable.vip);
+            seat.setBackgroundResource(R.drawable.vip_free);
           }
           seatId = seatData.getInt("id");
         } catch (Exception e) {
@@ -360,17 +367,31 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     seat.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
+        try {
+          if (finalSeatData.getBoolean("isVip")) {
+            originalPrice+=vipExtraPrice;
+          }
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
         if (!time[0]) {
           seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.seat_check));
           count1++;
-          ticketSelected.add("{\"ageType\":"+ageType+",\"seatId\":" + finalSeatId.toString() + "}");
+          ticketSelected.add(finalSeatId.toString());
           originalTotalPrice += originalPrice;
+          try {
+            if (finalSeatData.getBoolean("isVip")) {
+              seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.vip));
+            }
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
           discountedTotalPrice+=originalPrice*discountMag;
           time[0] = true;
         } else {
           try {
             if (finalSeatData.getBoolean("isVip")) {
-              seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.vip));
+              seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.vip_free));
             }else {
               seat.setBackgroundDrawable(getResources().getDrawable(R.drawable.seat_free));
             }
@@ -379,7 +400,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
             e.printStackTrace();
           }
           count1--;
-          ticketSelected.remove("{\"ageType\":"+ageType+",\"seatId\":" + finalSeatId.toString() + "}");
+          ticketSelected.remove( finalSeatId.toString());
           originalTotalPrice -= originalPrice;
           discountedTotalPrice-=originalPrice*discountMag;
           time[0] = false;
@@ -391,6 +412,14 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
           discountedTotalPrice=0;
         }
         showPrice();
+        try {
+          if (finalSeatData.getBoolean("isVip")) {
+            originalPrice-=vipExtraPrice;
+          }
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+        //Log.e("origin, discount",String.valueOf(originalTotalPrice)+' '+String.valueOf(discountedTotalPrice));
       }
     });
     return seat;

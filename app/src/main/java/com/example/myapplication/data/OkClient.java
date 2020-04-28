@@ -314,7 +314,11 @@ public class OkClient {
       try {
         result = okHttpClient.newCall(request).execute().body().string();
         JSONObject object = new JSONObject(result);
-        result = new JSONObject(object.getString("screenings")).getString("content");
+        if(movie!=null){
+            result = object.getString("content");
+        }else {
+            result = new JSONObject(object.getString("screenings")).getString("content");
+        }
       }catch (Exception e){
         e.printStackTrace();
       }
@@ -494,5 +498,15 @@ public class OkClient {
       result= client.newCall(request).execute().body().string();
       Log.e("response",result);
       return result;
+    }
+
+    public String getAuditoriumInfo(String id) throws Exception{
+        OkHttpClient okHttpClient  = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url+"auditoriums/"+id)
+                .addHeader("Cookie", "JSESSIONID="+cookie)
+                .build();
+        result = okHttpClient.newCall(request).execute().body().string();
+        return result;
     }
 }

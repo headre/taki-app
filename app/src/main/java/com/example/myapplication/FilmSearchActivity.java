@@ -77,7 +77,7 @@ public class FilmSearchActivity extends AppCompatActivity {
         screenButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            Intent  intent = new Intent(FilmSearchActivity.this,FilmSearchActivity.class);
+            Intent  intent = new Intent(FilmSearchActivity.this,ScreenActivity.class);
             startActivity(intent);
           }
         });

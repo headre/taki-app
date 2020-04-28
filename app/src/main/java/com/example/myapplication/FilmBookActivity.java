@@ -252,7 +252,7 @@ public class FilmBookActivity extends AppCompatActivity {
     titleV.setText(name);
     blurbV.setText(blurb);
 
-    if(coverName!="null"){
+    if(!coverName.equals("null")){
       Thread m = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -301,7 +301,7 @@ public class FilmBookActivity extends AppCompatActivity {
     content.setTextColor(Color.parseColor("#ffffff"));
     content.setTextSize(20);
     content.setLayoutParams(contentParams);
-    content.setText("date: "+date+"\nfrom "+startTime+" to "+finishTime+"\nprice: "+price+"\nroom: "+room);
+    content.setText("date: "+date+"\n"+startTime+"-"+finishTime+"\nprice: "+price+"\nroom: "+room);
 
     Button ticketing = new Button(FilmBookActivity.this);
     LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(pixelTools.dip2px(FilmBookActivity.this, 10), LinearLayout.LayoutParams.MATCH_PARENT, 3);
@@ -318,7 +318,7 @@ public class FilmBookActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("id",id);
-        editor.commit();
+        editor.apply();
         startActivity(intent);
       }
     });

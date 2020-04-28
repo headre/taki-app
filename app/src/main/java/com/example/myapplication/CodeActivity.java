@@ -3,18 +3,27 @@ package com.example.myapplication;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.pdf.PdfDocument;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.data.OkClient;
@@ -29,12 +38,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CodeActivity extends AppCompatActivity {
-    private Button c_button;
+    private Button refundButton, mailButton;
     private ArrayList<String> i = new ArrayList<>();
-    private String cookie, orderString, orderId;
+    private String cookie, orderString, orderId,date;
     private ImageView cover;
     private TextView orderInfo, title, Blurb;
-    private LinearLayout qr_layout;
+    private LinearLayout qr_layout, emailTicket;
+    private ArrayList<Integer> ticketsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +56,8 @@ public class CodeActivity extends AppCompatActivity {
         cover = findViewById(R.id.cover);
         Blurb = findViewById(R.id.blurb);
         qr_layout = findViewById(R.id.qr_layout);
+        mailButton = findViewById(R.id.email);
+        emailTicket = findViewById(R.id.main);
 
 
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
@@ -55,11 +67,33 @@ public class CodeActivity extends AppCompatActivity {
         cookie = sharedPreferences.getString("cookie", "");
         orderId = sharedPreferences.getString("recentOrderId", "");
 
-        c_button = findViewById(R.id.back);
-        c_button.setOnClickListener(new View.OnClickListener() {
+        mailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //return
+                String tips = "Tickets are being generated, please wait";
+                Toast toast = Toast.makeText(CodeActivity.this, tips, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+                Thread t = new Thread(new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void run() {
+                        try {
+                            pdfModel(emailTicket);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                t.start();
+            }
+        });
+
+        refundButton = findViewById(R.id.refund);
+        refundButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refundTickets();
                 Intent intent = new Intent(CodeActivity.this, FilmActivity.class);
                 startActivity(intent);
             }
@@ -82,10 +116,9 @@ public class CodeActivity extends AppCompatActivity {
         t.start();
     }
 
-    //未完成
+    //展示订单信息
     private void showOrder() throws Exception {
         JSONObject order = new JSONObject(orderString);
-        String date;
         String startTime;
         String finishTime;
         String ageType;
@@ -107,10 +140,10 @@ public class CodeActivity extends AppCompatActivity {
             String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
                     + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost;
             runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                orderInfo.setText(infoDetails);
-              }
+                @Override
+                public void run() {
+                    orderInfo.setText(infoDetails);
+                }
             });
 
             Thread t = new Thread(new Runnable() {
@@ -118,16 +151,17 @@ public class CodeActivity extends AppCompatActivity {
                 public void run() {
                     try {
                         String infoDetails = null;
-                        Integer width = 450,height = 450;
-                        if(tickets.length()>2){
-                          width=200;
-                          height =200;
+                        Integer width = 450, height = 450;
+                        if (tickets.length() > 2) {
+                            width = 200;
+                            height = 200;
                         }
                         Integer finalWidth = width;
                         Integer finalHeight = height;
                         for (int i = 0; i < tickets.length(); i++) {
                             JSONObject ticket = tickets.getJSONObject(i);
                             Integer seatId = ticket.getInt("seatId");
+                            ticketsList.add(ticket.getInt("id"));
                             String seat = new OkClient(cookie).getSeatsPosition(seatId);
                             String validation = ticket.getString("validation");
                             JSONObject pos = new JSONObject(seat);
@@ -135,7 +169,7 @@ public class CodeActivity extends AppCompatActivity {
                             infoDetails += "\nseat: " + seatPos;
 
 
-                          runOnUiThread(new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     Bitmap bitmap = QRCodeUtil.createQRCodeBitmap(validation, finalWidth, finalHeight);
@@ -200,5 +234,96 @@ public class CodeActivity extends AppCompatActivity {
         qr_layout.addView(qr_code);
     }
 
+    //根据票的放映日期判断是否可以退票
+    private Boolean refundOk(String date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Boolean avail = false;
+        try {
+            Date today = sdf.parse(sdf.format(new Date()));
+            Date targetDate = sdf.parse(date);
+            if (today.getTime() <= targetDate.getTime()) {
+                avail = true;
+            }
+            Log.e("refundOk", avail.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return avail;
+    }
+
+    private void refundTickets() {
+        if (!refundOk(date)) {
+            String tips = "THe tickets you chose has over date ones!";
+            Toast toast = Toast.makeText(CodeActivity.this, tips, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+        } else {
+            for (int i = 0; i < ticketsList.size(); i++) {
+                int finalI = i;
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            new OkClient(cookie).refund(ticketsList.get(finalI));
+                            if (finalI == ticketsList.size() - 1) {
+                                String tips = "refund successfully, all fees return to your accounts, please check";
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast toast = Toast.makeText(CodeActivity.this, tips, Toast.LENGTH_SHORT);
+                                        toast.setGravity(Gravity.CENTER, 0, 0);
+                                        toast.show();
+                                    }
+                                });
+
+                                init();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                t.start();
+            }
+            Log.e("refund", "finished");
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void pdfModel(LinearLayout layout) throws Exception {
+        String path = getApplicationContext().getFilesDir().getPath();
+        Log.e("path", path);
+        path = "/data/data/com.example.myapplication";
+        PdfDocument document = new PdfDocument();
+        Log.e("size, width, height", String.valueOf(layout.getWidth()) + " " + String.valueOf(layout.getHeight()));
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(layout.getWidth(), layout.getHeight(), 1).create();
+        PdfDocument.Page page = document.startPage(pageInfo);
+        layout.draw(page.getCanvas());
+        document.finishPage(page);
+        File file = new File(path + "/test.pdf");
+        FileOutputStream outputStream = new FileOutputStream(file);
+        try {
+            document.writeTo(outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        document.close();
+        try {
+            new OkClient(cookie).sendTicketToEmail(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String tips = "ticket has been sent to your email box, please check";
+                Toast toast = Toast.makeText(CodeActivity.this, tips, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
+        });
+    }
 
 }

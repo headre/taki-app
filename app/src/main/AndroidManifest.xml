@@ -28,6 +28,7 @@
     <activity android:name=".FilmSearchActivity" android:label="Search"/>
     <activity android:name=".RegisterActivity" android:label="Register"/>
     <activity android:name=".CodeActivity" android:label="Pay"/>
+      <activity android:name=".TicketActivity" android:label="tickets"/>
   </application>
 
   <uses-permission android:name="android.permission.INTERNET" />

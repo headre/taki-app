@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class FilmUserActivity extends AppCompatActivity {
-  private Button userButton, screenButton, cinemaButton, logoutButton, refundButton,mailButton;
+  private Button userButton, screenButton, cinemaButton, logoutButton, refundButton,mailButton,ordersButton;
   private LinearLayout orders,emailTicket;
   private String cookie, orderList;
   private Integer refund = 0;
@@ -55,6 +55,7 @@ public class FilmUserActivity extends AppCompatActivity {
     cinemaButton = findViewById(R.id.cinema);
     refundButton = findViewById(R.id.refund);
     mailButton = findViewById(R.id.email);
+    ordersButton = findViewById(R.id.tickets);
 
     orders = findViewById(R.id.orders);
     logoutButton = findViewById(R.id.logout);
@@ -63,6 +64,14 @@ public class FilmUserActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie", "");
+
+    ordersButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent= new Intent(FilmUserActivity.this,TicketActivity.class);
+        startActivity(intent);
+      }
+    });
 
     mailButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -376,7 +385,7 @@ public class FilmUserActivity extends AppCompatActivity {
     try {
       Date today = sdf.parse(sdf.format(new Date()));
       Date targetDate = sdf.parse(date);
-      if (today.getTime() < targetDate.getTime()) {
+      if (today.getTime() <= targetDate.getTime()) {
         avail = true;
       }
       Log.e("refundOk", avail.toString());

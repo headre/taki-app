@@ -176,7 +176,9 @@ public class FilmUserActivity extends AppCompatActivity {
               if (orderList != null) {
                 orderArray = new JSONArray(orderList);
                 for (int i = 0; i < orderArray.length(); i++) {
-                  addOrder(orderArray.getJSONObject(i));
+                  if(Double.valueOf(orderArray.getJSONObject(i).getString("totalCost"))!=0) {
+                    addOrder(orderArray.getJSONObject(i));
+                  }
                 }
               }
             } catch (Exception e) {
@@ -222,13 +224,12 @@ public class FilmUserActivity extends AppCompatActivity {
       roomId = baseScreening.getInt("auditoriumId");
       movieId = baseScreening.getString("movieId");
       infoDetails[0] = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
-        + finishTime + "\nRoom " + roomId.toString() + " seat \nTotalPrice: " + totalCost;
+        + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost;
 
       for (int i = 0; i < tickets.length(); i++) {
         JSONObject ticket = tickets.getJSONObject(i);
         seatId = ticket.getInt("seatId");
         validation = ticket.getString("validation");
-
 
         Integer finalSeatId = seatId;
         Thread t = new Thread(new Runnable() {
@@ -239,7 +240,7 @@ public class FilmUserActivity extends AppCompatActivity {
               JSONObject pos = new JSONObject(seat);
               String seatPos = "( " + pos.getString("row") + " , " + pos.getString("col") + " )";
 
-              infoDetails[0].replace("seat", "seat " + seatPos + " ");
+              infoDetails[0]+="\nseat: " + seatPos + " ";
               Log.e("info", infoDetails[0]);
               Title[0] = new JSONObject(new OkClient().getMovieInfo(movieId)).getString("name");
               runOnUiThread(new Runnable() {
@@ -257,6 +258,7 @@ public class FilmUserActivity extends AppCompatActivity {
         t.start();
         ImageView qrCode = new ImageView(FilmUserActivity.this);
         LinearLayout.LayoutParams qrParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        qrCode.setLayoutParams(qrParams);
         Bitmap bitmap = QRCodeUtil.createQRCodeBitmap(validation, 100, 100);
         qrCode.setImageBitmap(bitmap);
 
@@ -285,7 +287,7 @@ public class FilmUserActivity extends AppCompatActivity {
     title.setLayoutParams(titleParams);
 
 
-    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixelTools.dip2px(FilmUserActivity.this, 100));
+    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixelTools.dip2px(FilmUserActivity.this, 150));
     info.setBackgroundColor(Color.parseColor("#ffffff"));
     info.setGravity(Gravity.CENTER);
     info.setLayoutParams(infoParams);

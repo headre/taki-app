@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.myapplication.data.OkClient;
+import com.example.myapplication.data.QRCodeUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -176,68 +177,74 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
       finishTime = baseScreening.getString("finishTime");
       roomId = baseScreening.getInt("auditoriumId");
       movieId = baseScreening.getString("movieId");
+      String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
+              + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost;
+      runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          orderInfo.setText(infoDetails);
+        }
+      });
 
-      for (int i = 0; i < tickets.length(); i++) {
-        JSONObject ticket = tickets.getJSONObject(i);
-        seatId = ticket.getInt("seatId");
-
-
-        Integer finalSeatId = seatId;
-        Thread t = new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + " from " + startTime + " to "
-                + finishTime + "\nRoom " + roomId.toString() + " seat \nTotalPrice: " + totalCost;
-              String seat = new OkClient(cookie).getSeatsPosition(finalSeatId);
+      Thread t = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            String infoDetails = null;
+            for (int i = 0; i < tickets.length(); i++) {
+              JSONObject ticket = tickets.getJSONObject(i);
+              Integer seatId = ticket.getInt("seatId");
+              String seat = new OkClient(cookie).getSeatsPosition(seatId);
               JSONObject pos = new JSONObject(seat);
               String seatPos = "( " + pos.getString("row") + " , " + pos.getString("col") + " )";
-              infoDetails.replace("seat", "seat " + seatPos + " ");
-              Log.e("info", infoDetails);
+              infoDetails += "\nseat: " + seatPos;
+            }
+            Log.e("info", infoDetails);
 
-              String movieData = new OkClient().getMovieInfo(movieId);
-              JSONObject movieJSON = new JSONObject(movieData);
-              String Title = movieJSON.getString("name");
-              String blurb = movieJSON.getString("blurb");
-              String coverName = movieJSON.getString("cover");
+            String movieData = new OkClient().getMovieInfo(movieId);
+            JSONObject movieJSON = new JSONObject(movieData);
+            String Title = movieJSON.getString("name");
+            String blurb = movieJSON.getString("blurb");
+            String coverName = movieJSON.getString("cover");
 
 
-              if (coverName != "null") {
-                Thread m = new Thread(new Runnable() {
-                  @Override
-                  public void run() {
-                    try {
-                      Bitmap bitmap = new OkClient().getImg(coverName);
-                      runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                          cover.setImageBitmap(bitmap);
-                        }
-                      });
-                    } catch (Exception e) {
-                      e.printStackTrace();
-                    }
-                  }
-                });
-                m.start();
-              }
-              runOnUiThread(new Runnable() {
+            if (coverName != "null") {
+              Thread m = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    orderInfo.setText(infoDetails);
-                    title.setText(Title);
-                    Blurb.setText(blurb);
+                  try {
+                    Bitmap bitmap = new OkClient().getImg(coverName);
+                    runOnUiThread(new Runnable() {
+                      @Override
+                      public void run() {
+                        cover.setImageBitmap(bitmap);
+                      }
+                    });
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                  }
                 }
               });
-            } catch (Exception e) {
-              e.printStackTrace();
+              m.start();
             }
+            String finalInfoDetails = infoDetails;
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                orderInfo.append(finalInfoDetails);
+                title.setText(Title);
+                Blurb.setText(blurb);
+              }
+            });
+
+          } catch (Exception e) {
+            e.printStackTrace();
           }
-        });
-        t.start();
-      }
-
-
+        }
+      });
+      t.start();
     }
+
+
   }
 }

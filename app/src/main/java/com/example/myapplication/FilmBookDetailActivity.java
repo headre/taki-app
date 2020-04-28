@@ -37,7 +37,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
   private Button bookButton, freshButton,adult,senior,child;
   private double originalTotalPrice, originalPrice,discountedTotalPrice;
   private String [] ageTypeList = {"ADULT","SENIOR","CHILD"};
-  private String cookie = null, screenId = null,ageType = ageTypeList[0];
+  private String cookie = null, screenId = null,ageType = ageTypeList[0],auditoriumId;
   private Integer row;
   private Integer col;
   private Integer count1 = 0;
@@ -102,7 +102,8 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
       public void run() {
         OkClient auditoirum = new OkClient(cookie);
         try {
-          seatsOfAuditorium = auditoirum.GetAllSeat(new OkClient(cookie).getAuditoruimId(screenId));
+          auditoriumId = new OkClient(cookie).getAuditoruimId(screenId);
+          seatsOfAuditorium = auditoirum.GetAllSeat(auditoriumId);
           JSONObject size = auditoirum.getSize();
           row = size.getInt("row");
           col = size.getInt("col");
@@ -438,7 +439,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     String coverName = movieData.getString("cover");
 
     title.setText(movieData.getString("name"));
-    info.setText("In " + screenData.getString("date") + "\nfrom " + screenData.getString("time") + " to " + screenData.getString("finishTime"));
+    info.setText("Room:"+auditoriumId+"\nIn " + screenData.getString("date") + "\nfrom " + screenData.getString("time") + " to " + screenData.getString("finishTime"));
     if (coverName != "null") {
       Thread m = new Thread(new Runnable() {
         @Override

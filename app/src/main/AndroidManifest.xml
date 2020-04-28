@@ -24,7 +24,7 @@
     <activity android:name=".FilmBookDetailActivity" android:label="Seats"/>
     <activity android:name=".FilmUserActivity" android:label="User"/>
     <activity android:name=".PayActivity" android:label="Pay"/>
-    <activity android:name=".ScreenActivity" android:label="Screen"/>
+    <activity android:name=".ScreenActivity" android:label="Released Movies"/>
     <activity android:name=".FilmSearchActivity" android:label="Search"/>
     <activity android:name=".RegisterActivity" android:label="Register"/>
     <activity android:name=".CodeActivity" android:label="Ticket"/>

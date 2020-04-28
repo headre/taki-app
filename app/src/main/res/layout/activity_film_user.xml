@@ -330,7 +330,7 @@
                     android:textAlignment="center"
                     android:gravity="center_horizontal" />
             </LinearLayout>
-<<<<<<< HEAD
+
 
             <LinearLayout
                 android:layout_width="55dp"
@@ -354,9 +354,6 @@
             </LinearLayout>
 
 
-            
-=======
->>>>>>> 2536a3bc9d092ddb96cbbd63c7292aff63709d7f
 
             <LinearLayout
                 android:layout_width="55dp"
@@ -440,11 +437,7 @@
             </LinearLayout>
         </HorizontalScrollView>
         </LinearLayout>
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 2536a3bc9d092ddb96cbbd63c7292aff63709d7f
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="30dp"

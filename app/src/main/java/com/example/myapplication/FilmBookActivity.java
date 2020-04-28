@@ -235,49 +235,46 @@ public class FilmBookActivity extends AppCompatActivity {
   }
 
   private void setMovieInfo(String data)throws Exception {
-    JSONObject movieInfo = new JSONObject(data);
+      JSONObject movieInfo = new JSONObject(data);
 
-    String name = movieInfo.getString("name");
-    String blurb = movieInfo.getString("blurb");
-    String coverName = movieInfo.getString("cover");
-    String director = movieInfo.getString("director");
+      String name = movieInfo.getString("name");
+      String blurb = movieInfo.getString("blurb");
+      String coverName = movieInfo.getString("cover");
+      String director = movieInfo.getString("director");
 
-    //生成包含所有actor的列表
-    //String[] actors = movieInfo.getString("leadActors").split(",");
-    //Since it's unused, release corresponding memory
-    ImageView coverV = findViewById(R.id.cover);
-    TextView titleV = findViewById(R.id.name);
-    TextView blurbV = findViewById(R.id.blurb);
+      //生成包含所有actor的列表
+      //String[] actors = movieInfo.getString("leadActors").split(",");
+      //Since it's unused, release corresponding memory
+      ImageView coverV = findViewById(R.id.cover);
+      TextView titleV = findViewById(R.id.name);
+      TextView blurbV = findViewById(R.id.blurb);
 
-    titleV.setText(name);
-    blurbV.setText(blurb);
-<<<<<<< HEAD
+      titleV.setText(name);
+      blurbV.setText(blurb);
 
-    if(!coverName.equals("null")){
-=======
-    setTitle(name);//Title of activity
-    if(coverName!="null"){
->>>>>>> 2536a3bc9d092ddb96cbbd63c7292aff63709d7f
-      Thread m = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            Bitmap bitmap = new OkClient(cookie).getImg(coverName);
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                coverV.setImageBitmap(bitmap);
-              }
-            });
-          } catch (Exception e) {
-            e.printStackTrace();
+      if (!coverName.equals("null")) {
+          setTitle(name);//Title of activity
+          if (coverName != "null") {
+              Thread m = new Thread(new Runnable() {
+                  @Override
+                  public void run() {
+                      try {
+                          Bitmap bitmap = new OkClient(cookie).getImg(coverName);
+                          runOnUiThread(new Runnable() {
+                              @Override
+                              public void run() {
+                                  coverV.setImageBitmap(bitmap);
+                              }
+                          });
+                      } catch (Exception e) {
+                          e.printStackTrace();
+                      }
+                  }
+              });
+              m.start();
           }
-        }
-      });
-      m.start();
-    }
+      }
   }
-
   private LinearLayout setScreensLayout(String data) throws Exception {
     JSONObject screen = new JSONObject(data);
 

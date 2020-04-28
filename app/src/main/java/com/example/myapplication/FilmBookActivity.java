@@ -243,15 +243,15 @@ public class FilmBookActivity extends AppCompatActivity {
     String director = movieInfo.getString("director");
 
     //生成包含所有actor的列表
-    String[] actors = movieInfo.getString("leadActors").split(",");
-
+    //String[] actors = movieInfo.getString("leadActors").split(",");
+    //Since it's unused, release corresponding memory
     ImageView coverV = findViewById(R.id.cover);
     TextView titleV = findViewById(R.id.name);
     TextView blurbV = findViewById(R.id.blurb);
 
     titleV.setText(name);
     blurbV.setText(blurb);
-
+    setTitle(name);//Title of activity
     if(coverName!="null"){
       Thread m = new Thread(new Runnable() {
         @Override

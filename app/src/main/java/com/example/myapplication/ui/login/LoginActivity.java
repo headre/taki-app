@@ -172,7 +172,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
-    
+
     public void sendMessage(View view){
         Thread t = new Thread(new Runnable() {
             @Override

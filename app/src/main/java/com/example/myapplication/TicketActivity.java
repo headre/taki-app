@@ -99,8 +99,14 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
             }
         });
     }
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+        init();
+    }
 
     private void init() {
+        ticketlist.removeAllViews();
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -290,6 +296,7 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                         Intent intent = new Intent(TicketActivity.this, CodeActivity.class);
                         if(!finalStatusB){
                             intent = new Intent(TicketActivity.this,PayActivity.class);
+                            intent.putExtra("father","ticket");
                         }
                         startActivity(intent);
                     }

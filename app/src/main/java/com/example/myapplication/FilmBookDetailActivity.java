@@ -96,6 +96,11 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     });
   }
 
+  @Override
+  protected void onResume() {
+    super.onResume();
+    UIInit();
+  }
   private void UIInit() {
     Thread t = new Thread(new Runnable() {
       @Override
@@ -185,6 +190,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
           public void onClick(DialogInterface dialog, int which) {
             sendOrder();
             Intent intent = new Intent(FilmBookDetailActivity.this, PayActivity.class);
+            intent.putExtra("father","bookdetail");
             startActivity(intent);
           }
         });

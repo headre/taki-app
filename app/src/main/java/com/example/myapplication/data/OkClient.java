@@ -12,10 +12,17 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import androidx.annotation.Nullable;
 import okhttp3.Call;
@@ -33,21 +40,45 @@ import okhttp3.ResponseBody;
 
 
 public class OkClient {
-    private OkHttpClient okHttpClient = new OkHttpClient();
+    private static OkHttpClient okHttpClient = new OkHttpClient();
     private String url, result = new String(), cookie = "";
     private Integer rowMax = 0, colMax = 0;
+    private static SSLSocketFactory createSSLSocketFactory() {
+        SSLSocketFactory ssfFactory = null;
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, new TrustManager[]{new MyTrustManager()}, new SecureRandom());
+            ssfFactory = sc.getSocketFactory();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        return ssfFactory;
+    }
+    static {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(30, TimeUnit.SECONDS);
+        builder.sslSocketFactory(createSSLSocketFactory());
+        builder.hostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        });
+
+        okHttpClient = builder.build();
+    }
     public OkClient() {
-        this.url = "http://106.12.203.34:8080/";
+        this.url = "https://106.12.203.34:8443/";
     }
 
     public OkClient(String cookie) {
-        this.url = "http://106.12.203.34:8080/";
+        this.url = "https://106.12.203.34:8443/";
         this.cookie = cookie;
     }
 
     private void ResetUrl() {
-        this.url = "http://106.12.203.34:8080/";
+        this.url = "https://106.12.203.34:8443/";
     }
 
     public String getResult() {
@@ -82,7 +113,6 @@ public class OkClient {
     }
 
     public String getReleasedOrNotMovie(Integer flag) throws Exception{
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url+"movies/findmovie?s=20&q="+flag)
                 .build();
@@ -156,11 +186,6 @@ public class OkClient {
     }
 
 
-    //将请求执行，返回response的字符串
-    private String readJ(Call call) throws IOException {
-        Response response = call.execute();
-        return response.body().string();
-    }
 
     //登录模块
     public void login(String username, String password) {
@@ -175,8 +200,16 @@ public class OkClient {
 
             @Override
             public List<Cookie> loadForRequest(HttpUrl url) {
-                List<Cookie> cookies = cookieStore.get(HttpUrl.parse("http://106.12.203.34:8080/"));
+                List<Cookie> cookies = cookieStore.get(HttpUrl.parse("https://106.12.203.34:8443/"));
                 return cookies != null ? cookies : new ArrayList<Cookie>();
+            }
+        })
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .sslSocketFactory(createSSLSocketFactory())
+        .hostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
             }
         }).build();
         RequestBody body = new FormBody.Builder()
@@ -199,14 +232,12 @@ public class OkClient {
 
     //获取电影列表模块
     private void getMovies() {
-        okHttpClient = new OkHttpClient();
         final Request request = new Request.Builder()
                 .url(url + "?s=20")
                 .get()//默认就是GET请求
                 .build();
-        Call call = okHttpClient.newCall(request);
         try {
-            result = readJ(call);
+            result = okHttpClient.newCall(request).execute().body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -214,14 +245,12 @@ public class OkClient {
 
     //这玩意好像和上面那个是同一个东西
     public void getScreenings() {
-        okHttpClient = new OkHttpClient();
         final Request request = new Request.Builder()
                 .url(url + "?s=20")
                 .get()//默认就是GET请求
                 .build();
-        Call call = okHttpClient.newCall(request);
         try {
-            result = readJ(call);
+            result = okHttpClient.newCall(request).execute().body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -237,7 +266,6 @@ public class OkClient {
 
     //上传选座信息
     public String sendTicket(ArrayList<String> ticketsList, String cookie, String screenId) throws IOException {
-        OkHttpClient okHttpClient = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, ticketsList.toString());
 
@@ -252,7 +280,6 @@ public class OkClient {
     }
 
     public void payOrder(String cookie) throws IOException {
-        OkHttpClient okHttpClient = new OkHttpClient();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
         Request confirm = new Request.Builder()
@@ -265,7 +292,6 @@ public class OkClient {
     }
 
     public void cancelOrder(String cookie) throws IOException {
-        OkHttpClient okHttpClient = new OkHttpClient();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
         Request confirm = new Request.Builder()
@@ -278,7 +304,6 @@ public class OkClient {
     }
 
     public String getOrder(String id) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "orders/" + id)
                 .header("cookie", "JSESSIONID=" + cookie)
@@ -291,7 +316,6 @@ public class OkClient {
 
 
     public String getOrders(String cookie) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "users/orders")
                 .header("cookie", "JSESSIONID=" + cookie)
@@ -301,7 +325,6 @@ public class OkClient {
     }
 
     public Bitmap getImg(String name) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "file/" + name)
                 .addHeader("Cookie", "JSESSIONID=" + cookie)
@@ -313,7 +336,6 @@ public class OkClient {
     }
 
     public String getSearch(String keyword) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "movies/search?q=" + keyword)
                 .build();
@@ -332,7 +354,6 @@ public class OkClient {
             contentCount = 10;
         }
         String params = "screenings/search?q=" + date + "&m=" + movie + "&p=" + page + "&s=" + contentCount;
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + params)
                 .build();
@@ -353,15 +374,14 @@ public class OkClient {
     //获取影厅可用的所有座位
     public ArrayList<HashMap> GetAllSeat(String auditoriumId) {
         ArrayList<HashMap> seats = new ArrayList<>();
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
+        //OkHttpClient client = new OkHttpClient().newBuilder().build();
         Request request = new Request.Builder()
-                .url("http://106.12.203.34:8080/seats/auditoriums/" + auditoriumId)
+                .url(url+"seats/auditoriums/" + auditoriumId)
                 .method("GET", null)
                 .addHeader("Cookie", "JSESSIONID=" + cookie)
                 .build();
         try {
-            result = client.newCall(request).execute().body().string();
+            result = okHttpClient.newCall(request).execute().body().string();
             JSONArray jsonArray = new JSONArray(result);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject seat = jsonArray.getJSONObject(i);
@@ -393,7 +413,6 @@ public class OkClient {
 
     //获取当前排片被占用的座位
     public ArrayList<HashMap> seatTaken(String screenId) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "tickets/screenings/" + screenId)
                 .header("Cookie", "JSESSIONID=" + cookie)
@@ -421,7 +440,6 @@ public class OkClient {
 
     //通过screenId获取博放映厅的编号id
     public String getAuditoruimId(String screenId) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .get()
                 .url(url + "screenings/" + screenId)
@@ -433,7 +451,6 @@ public class OkClient {
     }
 
     public void logout() throws IOException {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .get()
                 .url(url + "logout")
@@ -444,7 +461,6 @@ public class OkClient {
     }
 
     public String getSeatsPosition(Integer id) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "seats/" + id)
                 .addHeader("Cookie", "JSESSIONID=" + cookie)
@@ -454,7 +470,6 @@ public class OkClient {
     }
 
     public String register(String username, String email, String password, String id_code) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("username", username);
@@ -474,7 +489,6 @@ public class OkClient {
     }
 
     public String sendIdCode(String email) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", email);
@@ -490,7 +504,6 @@ public class OkClient {
     }
 
     public String refund(Integer id) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
         Request request = new Request.Builder()
@@ -505,8 +518,7 @@ public class OkClient {
     }
 
     public String sendTicketToEmail(File file) throws Exception {
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
+        //OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("title", "Your ticket")
@@ -520,13 +532,12 @@ public class OkClient {
                 .method("POST", body)
                 .addHeader("Cookie", "JSESSIONID=" + cookie)
                 .build();
-        result = client.newCall(request).execute().body().string();
+        result = okHttpClient.newCall(request).execute().body().string();
         Log.e("response", result);
         return result;
     }
 
     public String getAuditoriumInfo(String id) throws Exception {
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url + "auditoriums/" + id)
                 .addHeader("Cookie", "JSESSIONID=" + cookie)
@@ -540,7 +551,6 @@ public class OkClient {
         jsonObject.put("number",tel_number);
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, jsonObject.toString());
-        OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url+"register/send")
                 .post(body)

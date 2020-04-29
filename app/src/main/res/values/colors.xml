@@ -4,9 +4,6 @@
     <color name="colorPrimaryDark">#32419f</color>
     <color name="colorAccent">#D81B60</color>
     <color name="colorBackground">#ffffff</color>
-    <color name="cl_seat_unpressed">#c0c4cc</color>
-    <color name="cl_seat_pressed">#361437</color>
     <color name="date">#6673B4</color>
     <color name="grey">#f1f1f1</color>
-    <color name="selected">#03A9F4</color>
 </resources>

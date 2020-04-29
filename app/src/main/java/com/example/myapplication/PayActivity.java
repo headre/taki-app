@@ -9,7 +9,9 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,7 +31,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
   Button wechat, ali, cash, confirm, backReturn, cancel;
   public static int x, c;
   public int[] count = new int[3];
-  private TextView orderInfo,title,Blurb;
+  private TextView orderInfo,title,Blurb,count_down_V;
   private ImageView cover;
 
   public static Integer[] idB = new Integer[]{R.id.ali, R.id.wechat, R.id.cash};
@@ -52,6 +54,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
     title = findViewById(R.id.title);
     cover = findViewById(R.id.cover);
     Blurb = findViewById(R.id.blurb);
+    count_down_V = findViewById(R.id.count_down);
 
     confirm.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -81,24 +84,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
     cancel.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Thread t= new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              new OkClient(cookie).cancelOrder(cookie);
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          }
-        });
-        t.start();
-        try{
-          t.join();
-        }catch (Exception e){
-          e.printStackTrace();
-        }
-        Intent intent = new Intent(PayActivity.this, FilmBookDetailActivity.class);
-        startActivity(intent);
+        cancelOrder();
       }
     });
 
@@ -119,6 +105,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
       sButtons[x].setOnClickListener(this);
     }
     init();
+    countDown();
   }
 
   @Override
@@ -155,6 +142,26 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
     });
     t.start();
   }
+  private void cancelOrder(){
+    Thread t= new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          new OkClient(cookie).cancelOrder(cookie);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    t.start();
+    try{
+      t.join();
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    Intent intent = new Intent(PayActivity.this, FilmBookDetailActivity.class);
+    startActivity(intent);
+  }
 
   private void getAllData() throws Exception {
     JSONObject order = new JSONObject(orderString);
@@ -178,7 +185,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
       roomId = baseScreening.getInt("auditoriumId");
       movieId = baseScreening.getString("movieId");
       String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
-              + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost;
+              + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost+"\n";
       runOnUiThread(new Runnable() {
         @Override
         public void run() {
@@ -190,14 +197,18 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         @Override
         public void run() {
           try {
-            String infoDetails = null;
+            String infoDetails = "";
             for (int i = 0; i < tickets.length(); i++) {
               JSONObject ticket = tickets.getJSONObject(i);
               Integer seatId = ticket.getInt("seatId");
               String seat = new OkClient(cookie).getSeatsPosition(seatId);
               JSONObject pos = new JSONObject(seat);
-              String seatPos = "( " + pos.getString("row") + " , " + pos.getString("col") + " )";
-              infoDetails += "\nseat: " + seatPos;
+              Character rol = 'A';
+              for(int m=0;m<pos.getInt("col");m++){
+                rol++;
+              }
+              String seatPos = "row " + pos.getString("row") + " , col " + rol;
+              infoDetails += "seat: " + seatPos+"\n";
             }
             Log.e("info", infoDetails);
 
@@ -244,6 +255,28 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
       });
       t.start();
     }
+  }
+
+  private void countDown() {
+
+    CountDownTimer timer = new CountDownTimer(1000*60*15, 1000) {
+      @Override
+      public void onTick(long millisUntilFinished) {
+        double minute = Math.floor(millisUntilFinished/60/1000);
+        double seconds = millisUntilFinished/1000-minute*60;
+        count_down_V.setText("Order Automatically Canceled in "+(Integer.valueOf((int) minute))+" : "+(Integer.valueOf((int) seconds)));
+      }
+
+      @Override
+      public void onFinish() {
+        String tips = "order over due, automatically canceled";
+        Toast toast = Toast.makeText(PayActivity.this, tips, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+        cancelOrder();
+
+      }
+    }.start();
 
 
   }

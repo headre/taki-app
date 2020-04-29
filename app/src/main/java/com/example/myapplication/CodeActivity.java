@@ -40,7 +40,7 @@ import org.json.JSONObject;
 public class CodeActivity extends AppCompatActivity {
     private Button refundButton, mailButton;
     private ArrayList<String> i = new ArrayList<>();
-    private String cookie, orderString, orderId,date;
+    private String cookie, orderString, orderId, date;
     private ImageView cover;
     private TextView orderInfo, title, Blurb;
     private LinearLayout qr_layout, emailTicket;
@@ -138,7 +138,7 @@ public class CodeActivity extends AppCompatActivity {
             roomId = baseScreening.getInt("auditoriumId");
             movieId = baseScreening.getString("movieId");
             String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
-                    + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost;
+                    + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost + "\n";
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -150,7 +150,7 @@ public class CodeActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        String infoDetails = null;
+                        String infoDetails = "";
                         Integer width = 450, height = 450;
                         if (tickets.length() > 2) {
                             width = 200;
@@ -165,8 +165,12 @@ public class CodeActivity extends AppCompatActivity {
                             String seat = new OkClient(cookie).getSeatsPosition(seatId);
                             String validation = ticket.getString("validation");
                             JSONObject pos = new JSONObject(seat);
-                            String seatPos = "( " + pos.getString("row") + " , " + pos.getString("col") + " )";
-                            infoDetails += "\nseat: " + seatPos;
+                            Character rol = 'A';
+                            for (int m = 0; m < pos.getInt("col"); m++) {
+                                rol++;
+                            }
+                            String seatPos = "row " + pos.getString("row") + " , col " + rol;
+                            infoDetails += "seat: " + seatPos + "\n";
 
 
                             runOnUiThread(new Runnable() {

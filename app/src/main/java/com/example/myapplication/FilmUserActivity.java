@@ -44,6 +44,7 @@ public class FilmUserActivity extends AppCompatActivity {
   private Integer refund = 0;
   private ArrayList<Integer> ticketsList = new ArrayList<>();
   private final Integer maximumTickets = 1;
+  private TextView usernameV;
 
   @RequiresApi(api = Build.VERSION_CODES.KITKAT)
   @Override
@@ -56,6 +57,7 @@ public class FilmUserActivity extends AppCompatActivity {
     refundButton = findViewById(R.id.refund);
     mailButton = findViewById(R.id.email);
     ordersButton = findViewById(R.id.tickets);
+    usernameV =findViewById(R.id.fB_3);
 
     orders = findViewById(R.id.orders);
     logoutButton = findViewById(R.id.logout);
@@ -64,6 +66,7 @@ public class FilmUserActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie", "");
+    usernameV.setText(sharedPreferences.getString("username",""));
 
     ordersButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -138,6 +141,7 @@ public class FilmUserActivity extends AppCompatActivity {
           public void run() {
             try {
               new OkClient(cookie).logout();
+              editor.remove("username");
               editor.remove("cookie");
               editor.commit();
             } catch (IOException e) {
@@ -247,7 +251,11 @@ public class FilmUserActivity extends AppCompatActivity {
             try {
               String seat = new OkClient(cookie).getSeatsPosition(finalSeatId);
               JSONObject pos = new JSONObject(seat);
-              String seatPos = "( " + pos.getString("row") + " , " + pos.getString("col") + " )";
+              Character rol = 'A';
+              for(int i=0;i<pos.getInt("col");i++){
+                rol++;
+              }
+              String seatPos = "row " + pos.getString("row") + " , col " + rol;
 
               infoDetails[0]+="\nseat: " + seatPos + " ";
               Log.e("info", infoDetails[0]);

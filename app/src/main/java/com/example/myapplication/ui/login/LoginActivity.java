@@ -107,6 +107,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (loginResult.getSuccess() != null) {
                     //确认登录成功后完成跳转工作
                     Log.e("cookie",loginResult.getSuccess().getCookie());
+                    editor.putString("username",loginResult.getSuccess().getDisplayName());
                     editor.putString("cookie", loginResult.getSuccess().getCookie());
                     editor.commit();
                     startActivity(intent);

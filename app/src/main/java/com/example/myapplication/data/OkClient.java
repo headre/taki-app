@@ -534,4 +534,18 @@ public class OkClient {
         result = okHttpClient.newCall(request).execute().body().string();
         return result;
     }
+
+    public void sendMessage(String tel_number) throws Exception{
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("number",tel_number);
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, jsonObject.toString());
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url+"register/send")
+                .post(body)
+                .build();
+        result = okHttpClient.newCall(request).execute().body().string();
+        Log.e("response",result);
+    }
 }

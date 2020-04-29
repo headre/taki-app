@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -29,6 +30,7 @@ import android.content.Intent;
 import com.example.myapplication.FilmActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.RegisterActivity;
+import com.example.myapplication.data.OkClient;
 import com.example.myapplication.ui.login.LoginViewModel;
 import com.example.myapplication.ui.login.LoginViewModelFactory;
 
@@ -42,7 +44,6 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         //跳过登录部分
         SharedPreferences sharedPreferences = getSharedPreferences("login",MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         String cookie = sharedPreferences.getString("cookie","");
         final Intent intent=new Intent(LoginActivity.this, FilmActivity.class);
         if(cookie!=""){
@@ -73,8 +74,20 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        final EditText usernameEditText = findViewById(R.id.username);
-        final EditText passwordEditText = findViewById(R.id.password);
+        changeLoginEditText();
+    }
+
+    private void changeLoginEditText(){
+        if(tag_P==0&&tag_E==1){
+            setLoginEditText(findViewById(R.id.phone_number),findViewById(R.id.phone_id_code));
+        }else if(tag_E==0&&tag_P==1){
+            setLoginEditText(findViewById(R.id.username),findViewById(R.id.password));
+        }
+    }
+    private void setLoginEditText(EditText account,EditText idcode){
+        SharedPreferences sharedPreferences = getSharedPreferences("login",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        final Intent intent=new Intent(LoginActivity.this, FilmActivity.class);
         loginButton = findViewById(R.id.login);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
@@ -86,10 +99,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 loginButton.setEnabled(loginFormState.isDataValid());
                 if (loginFormState.getUsernameError() != null) {
-                    usernameEditText.setError(getString(loginFormState.getUsernameError()));
+                    account.setError(getString(loginFormState.getUsernameError()));
                 }
                 if (loginFormState.getPasswordError() != null) {
-                    passwordEditText.setError(getString(loginFormState.getPasswordError()));
+                    idcode.setError(getString(loginFormState.getPasswordError()));
                 }
             }
         });
@@ -131,19 +144,19 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
+                loginViewModel.loginDataChanged(account.getText().toString(),
+                        idcode.getText().toString());
             }
         };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        account.addTextChangedListener(afterTextChangedListener);
+        idcode.addTextChangedListener(afterTextChangedListener);
+        idcode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
+                    loginViewModel.login(account.getText().toString(),
+                            idcode.getText().toString());
                 }
                 return false;
             }
@@ -153,10 +166,36 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
+                loginViewModel.login(account.getText().toString(),
+                        idcode.getText().toString());
             }
         });
+
+    }
+    
+    public void sendMessage(View view){
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final EditText phoneNumberEditText = findViewById(R.id.phone_number);
+                    new OkClient().sendMessage(phoneNumberEditText.getText().toString());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String tips = "id code has been sent to your phone";
+                        Toast toast = Toast.makeText(LoginActivity.this, tips, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                    }
+                });
+
+            }
+        });
+        t.start();
     }
  public void login_P(View view)
     {
@@ -175,6 +214,7 @@ public class LoginActivity extends AppCompatActivity {
             on.setVisibility(View.VISIBLE);
             tag_P = 1;tag_E=0;
         }
+        changeLoginEditText();
     }
 
     public void change_E() {
@@ -185,6 +225,7 @@ public class LoginActivity extends AppCompatActivity {
             on.setVisibility(View.VISIBLE);
             tag_E = 1;tag_P=0;
         }
+        changeLoginEditText();
     }
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();

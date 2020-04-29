@@ -161,6 +161,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
     }
     Intent intent = new Intent(PayActivity.this, FilmBookDetailActivity.class);
     startActivity(intent);
+    finish();
   }
 
   private void getAllData() throws Exception {

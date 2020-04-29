@@ -123,6 +123,8 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                                         addOrder(orderArray.getJSONObject(i));
                                     }
                                 }
+                            }else{
+                                showNoData();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -165,12 +167,14 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 String movieId = null;
                 String name = null;
                 String covername = null;
+                Boolean statusB = null;
                 try {
                     movieData = new JSONObject(new OkClient().getMovieInfo(baseScreening.getString("movieId")));
                     Log.e("movieData",movieData.toString());
                     movieId = movieData.getString("id");
                     name = movieData.getString("name");
                     covername = movieData.getString("cover");
+                    statusB = order.getBoolean("completed");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -226,13 +230,13 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 //设置文本
                 LinearLayout movieText = new LinearLayout(TicketActivity.this);
                 LinearLayout.LayoutParams textBox = new LinearLayout.LayoutParams(dip2px(TicketActivity.this, 265), ViewGroup.LayoutParams.MATCH_PARENT);
-                movieText.setPadding(tpadding, tpadding, tpadding, tpadding);
+
                 movieText.setOrientation(LinearLayout.VERTICAL);
-                movieText.setBackgroundColor(Color.parseColor("#ffffff"));
+                movieText.setBackgroundColor(Color.parseColor("#000000"));
                 movieText.setGravity(Gravity.RIGHT);
                 movieText.setLayoutParams(textBox);
 
-                LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(dip2px(TicketActivity.this, 250), ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+                LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
                 title.setBackgroundColor(Color.parseColor("#ffffff"));
                 title.setGravity(Gravity.LEFT);
                 title.setTextColor(Color.parseColor("#000000"));
@@ -241,8 +245,9 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 title.setText(name + " " + number + " tickets");
 
                 TextView context = new TextView(TicketActivity.this);
-                LinearLayout.LayoutParams contextparams = new LinearLayout.LayoutParams(dip2px(TicketActivity.this, 250), ViewGroup.LayoutParams.WRAP_CONTENT, 3);
+                LinearLayout.LayoutParams contextparams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 3);
                 context.setBackgroundColor(Color.parseColor("#ffffff"));
+                contextparams.setMargins(0,1,0,0);
                 context.setGravity(Gravity.LEFT);
                 context.setTextColor(Color.parseColor("#000000"));
                 context.setTextSize(18);
@@ -258,7 +263,23 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 }
                 context.setText("Total price: " + totalCost + "\n Created at  " + dateS);
 
+                TextView status = new TextView(TicketActivity.this);
+                String statusS = "completed";
+                LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+                statusParams.setMargins(0,1,0,0);
+                status.setBackgroundColor(Color.parseColor("#ffffff"));
+                status.setGravity(Gravity.RIGHT);
+                status.setTextColor(Color.parseColor("#000000"));
+                if(!statusB){
+                    statusS = "uncompleted";
+                    status.setTextColor(Color.parseColor("#ff0000"));
+                }
+                status.setTextSize(18);
+                status.setLayoutParams(statusParams);
+                status.setText(statusS);
+
                 layout.setClickable(true);
+                Boolean finalStatusB = statusB;
                 layout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -267,6 +288,9 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                         editor.putString("recentOrderId", String.valueOf(id));
                         editor.commit();
                         Intent intent = new Intent(TicketActivity.this, CodeActivity.class);
+                        if(!finalStatusB){
+                            intent = new Intent(TicketActivity.this,PayActivity.class);
+                        }
                         startActivity(intent);
                     }
                 });
@@ -275,6 +299,7 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                     public void run() {
                         movieText.addView(title);
                         movieText.addView(context);
+                        movieText.addView(status);
 
                         //把所有东西塞进layout中
                         layout.addView(cover);

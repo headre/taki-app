@@ -65,6 +65,7 @@
         android:orientation="vertical">
 
         <EditText
+            android:id="@+id/phone_number"
             android:layout_width="300dp"
             android:layout_gravity="center"
             android:layout_height="wrap_content"
@@ -77,6 +78,7 @@
 
 
         <EditText
+            android:id="@+id/phone_id_code"
             android:layout_width="300dp"
             android:layout_gravity="center"
             android:layout_height="wrap_content"
@@ -89,6 +91,7 @@
             android:inputType="textPassword"
             android:selectAllOnFocus="true" />
         <Button
+            android:onClick="sendMessage"
             android:layout_width="80dp"
             android:layout_height="20dp"
             android:layout_marginLeft="260dp"

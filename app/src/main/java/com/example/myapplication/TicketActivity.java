@@ -125,8 +125,23 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                             if (orderList != null) {
                                 orderArray = new JSONArray(orderList);
                                 for (int i = 0; i < orderArray.length(); i++) {
-                                    if (!new JSONArray(orderArray.getJSONObject(i).getString("tickets")).getJSONObject(0).getString("validation").equals("null")) {
-                                        addOrder(orderArray.getJSONObject(i));
+                                    JSONObject order = orderArray.getJSONObject(i);
+                                    Log.e("order",order.toString());
+                                    Log.e("completed",order.getString("completed"));
+                                    JSONArray tickets = order.getJSONArray("tickets");
+                                    Log.e("length",String.valueOf(tickets.length()));
+                                    Boolean show  = false;
+                                    if(tickets.length()!=0) {
+                                        if (order.getBoolean("refunded")) {
+                                            show = false;
+                                        } else if (order.getBoolean("completed") && !tickets.getJSONObject(0).getString("validation").equals("null")) {
+                                            show = true;
+                                        } else if (!order.getBoolean("completed") && tickets.getJSONObject(0).getString("validation").equals("null")) {
+                                            show = true;
+                                        }
+                                    }
+                                    if(show){
+                                        addOrder(order);
                                     }
                                 }
                             }else{

@@ -364,6 +364,13 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
       position.put(row, col);
       if (seatPosAndInfo.get(position) != null) {
         seat.setBackgroundResource(R.drawable.seat_unable);
+        try {
+          if (seatData.getBoolean("isVip")) {
+            seat.setBackgroundResource(R.drawable.vip_unable);
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
         seat.setEnabled(false);
       }
     }

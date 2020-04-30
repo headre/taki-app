@@ -40,7 +40,7 @@ import org.json.JSONObject;
 public class CodeActivity extends AppCompatActivity {
     private Button refundButton, mailButton;
     private ArrayList<String> i = new ArrayList<>();
-    private String cookie, orderString, orderId, date;
+    private String cookie, orderString, orderId, date,time;
     private ImageView cover;
     private TextView orderInfo, title, Blurb;
     private LinearLayout qr_layout, emailTicket;
@@ -94,8 +94,10 @@ public class CodeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 refundTickets();
-                Intent intent = new Intent(CodeActivity.this, FilmActivity.class);
-                startActivity(intent);
+                if(refundOk(date)) {
+                    Intent intent = new Intent(CodeActivity.this, FilmActivity.class);
+                    startActivity(intent);
+                }
             }
         });
         init();
@@ -133,11 +135,11 @@ public class CodeActivity extends AppCompatActivity {
 
             ageType = baseTicket.getString("ageType");
             date = baseScreening.getString("date");
-            startTime = baseScreening.getString("time");
+            time = baseScreening.getString("time");
             finishTime = baseScreening.getString("finishTime");
             roomId = baseScreening.getInt("auditoriumId");
             movieId = baseScreening.getString("movieId");
-            String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + startTime + " to "
+            String infoDetails = tickets.length() + " " + ageType + " tickets\nIn " + date + "\nfrom " + time + " to "
                     + finishTime + "\nRoom " + roomId.toString() + "\nTotalPrice: " + totalCost + "\n";
             runOnUiThread(new Runnable() {
                 @Override
@@ -243,9 +245,14 @@ public class CodeActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Boolean avail = false;
         try {
-            Date today = sdf.parse(sdf.format(new Date()));
-            Date targetDate = sdf.parse(date);
-            if (today.getTime() <= targetDate.getTime()) {
+            String dateS = sdf.format(sdf.parse(date));
+            String dateAndTime = dateS+' '+time;
+            Log.e("detailTime",dateAndTime);
+            SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date targetDate = sdf1.parse(dateAndTime);
+            Date today = sdf1.parse(sdf1.format(new Date(System.currentTimeMillis())));
+            long minutes_30 = 30*60*1000;
+            if (today.getTime()<targetDate.getTime()-minutes_30) {
                 avail = true;
             }
             Log.e("refundOk", avail.toString());

@@ -80,8 +80,10 @@ public class LoginActivity extends AppCompatActivity {
     private void changeLoginEditText(){
         if(tag_P==0&&tag_E==1){
             setLoginEditText(findViewById(R.id.phone_number),findViewById(R.id.phone_id_code));
+            loginViewModel.setType(tag_E);
         }else if(tag_E==0&&tag_P==1){
             setLoginEditText(findViewById(R.id.username),findViewById(R.id.password));
+            loginViewModel.setType(tag_P);
         }
     }
     private void setLoginEditText(EditText account,EditText idcode){

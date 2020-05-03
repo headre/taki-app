@@ -37,6 +37,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**this is the activity to show the completed order
+ * it will read the order id which is stored in local storage in advance
+ * it will build a page showing all information of the order
+ * it supports refund function
+ * it supports send-email function which will create a pdf file first*/
+
+
 public class CodeActivity extends AppCompatActivity {
     private Button refundButton, mailButton;
     private ArrayList<String> i = new ArrayList<>();
@@ -51,6 +58,7 @@ public class CodeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_code);
 
+        //initialize widgets
         orderInfo = findViewById(R.id.info);
         title = findViewById(R.id.title);
         cover = findViewById(R.id.cover);
@@ -59,14 +67,12 @@ public class CodeActivity extends AppCompatActivity {
         mailButton = findViewById(R.id.email);
         emailTicket = findViewById(R.id.main);
 
-
+        //read cookie and the latest order in local storage
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-
         cookie = sharedPreferences.getString("cookie", "");
         orderId = sharedPreferences.getString("recentOrderId", "");
 
+        //add email method to button
         mailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,6 +95,7 @@ public class CodeActivity extends AppCompatActivity {
             }
         });
 
+        //add refund function to button
         refundButton = findViewById(R.id.refund);
         refundButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +110,7 @@ public class CodeActivity extends AppCompatActivity {
         init();
     }
 
+    //init the page and set the data
     private void init() {
         Thread t = new Thread(new Runnable() {
             @Override
@@ -118,15 +126,14 @@ public class CodeActivity extends AppCompatActivity {
         t.start();
     }
 
-    //展示订单信息
+    //show order information
     private void showOrder() throws Exception {
         JSONObject order = new JSONObject(orderString);
-        String startTime;
         String finishTime;
         String ageType;
         String movieId;
         String totalCost;
-        Integer seatId, roomId;
+        Integer roomId;
         totalCost = order.getString("totalCost");
         JSONArray tickets = new JSONArray(order.getString("tickets"));
         if (tickets != null) {
@@ -148,6 +155,7 @@ public class CodeActivity extends AppCompatActivity {
                 }
             });
 
+            //get the tickets' detail information of the order
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -232,6 +240,7 @@ public class CodeActivity extends AppCompatActivity {
 
     }
 
+    //add qr code imageview to the main layout
     private void addQrCode(Bitmap bitmap) {
         ImageView qr_code = new ImageView(CodeActivity.this);
         LinearLayout.LayoutParams qrCodeParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -240,7 +249,7 @@ public class CodeActivity extends AppCompatActivity {
         qr_layout.addView(qr_code);
     }
 
-    //根据票的放映日期判断是否可以退票
+    //determine if refund is allowable according to the time( the rest of time must be more than 30 min)
     private Boolean refundOk(String date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Boolean avail = false;
@@ -263,6 +272,7 @@ public class CodeActivity extends AppCompatActivity {
         return avail;
     }
 
+    //method to refund all the tickets of the order
     private void refundTickets() {
         if (!refundOk(date)) {
             String tips = "THe tickets you chose has over date ones!";
@@ -302,6 +312,7 @@ public class CodeActivity extends AppCompatActivity {
     }
 
 
+    //method to print out the page in pdf
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void pdfModel(LinearLayout layout) throws Exception {
         String path = getApplicationContext().getFilesDir().getPath();

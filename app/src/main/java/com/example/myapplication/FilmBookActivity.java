@@ -30,6 +30,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+/**this is the activity to show the detail of the movie
+ * it will read the movie id which is stored with key word "movie" in local storage in advance
+ * it will build a page showing all information of the movie and screenings
+ * it shows screenings of today as default and enables users to select different days
+ * users can jump to other hot-showing movies by click the movies in the hot-showing bar*/
+
 public class FilmBookActivity extends AppCompatActivity {
   private Button rbutton,fbutton,datePickButton;
   private String cookie = null,movieId,movieData;
@@ -41,19 +47,24 @@ public class FilmBookActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    //initialize today's date
     Date today = new Date(System.currentTimeMillis());
     date = new SimpleDateFormat("yyyy-MM-dd").format(today);
+
+    //get the movie id in local storage
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie","");
+
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_film_book);
+
+    //initialize widgets
     rbutton = findViewById(R.id._return);
     fbutton = findViewById(R.id._refresh);
     covers = findViewById(R.id.covers);
 
-
-
+    //initialize date picker widgets
     datePicker = findViewById(R.id.datePicker1);
     ((LinearLayout) ((ViewGroup) datePicker.getChildAt(0)).getChildAt(0)).setVisibility(View.GONE);
     Calendar calendar = Calendar.getInstance();
@@ -76,18 +87,22 @@ public class FilmBookActivity extends AppCompatActivity {
       }
     });
 
-
+    //initialize the screenlist
     screenlist = findViewById(R.id.screens_list);
     init(date);
+
+    //set return button
     rbutton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         editor.remove("movie");
         Intent intent = new Intent(FilmBookActivity.this,FilmActivity.class);
         startActivity(intent);
+        finish();
       }
     });
 
+    //set refresh button
     fbutton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -98,7 +113,7 @@ public class FilmBookActivity extends AppCompatActivity {
 
 
 
-
+  //set date picker's function
   public void date_picker(View view) {
     change();
   }
@@ -115,6 +130,7 @@ public class FilmBookActivity extends AppCompatActivity {
     }
   }
 
+  //set hot-showing bar's movies
   private void addNewMovie(JSONObject movieData) throws Exception {
     ImageView cover = new ImageView(FilmBookActivity.this);
     cover.setClickable(true);
@@ -141,7 +157,7 @@ public class FilmBookActivity extends AppCompatActivity {
       }
     });
 
-
+    //set hot-showing movies' posters
     if (coverName != "null") {
       Thread m = new Thread(new Runnable() {
         @Override
@@ -166,7 +182,7 @@ public class FilmBookActivity extends AppCompatActivity {
   }
 
 
-
+  //initialize the screen list by different days and initialize the movie data
   private void init(String date) {
     screenlist.removeAllViews();
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
@@ -202,7 +218,6 @@ public class FilmBookActivity extends AppCompatActivity {
       @Override
       public void run() {
         String movieInfo = new OkClient().getMovieInfo(movieId);
-        //String movieScreens = new OkClient().getMovieScreen(movieId);
         String movieScreens = new OkClient().screenSearch(date,movieId,0,20);
         try {
           JSONArray screens = new JSONArray(movieScreens);
@@ -234,6 +249,7 @@ public class FilmBookActivity extends AppCompatActivity {
 
   }
 
+  //set the movie data into the widgets
   private void setMovieInfo(String data)throws Exception {
       JSONObject movieInfo = new JSONObject(data);
 
@@ -242,9 +258,6 @@ public class FilmBookActivity extends AppCompatActivity {
       String coverName = movieInfo.getString("cover");
       String director = movieInfo.getString("director");
 
-      //生成包含所有actor的列表
-      //String[] actors = movieInfo.getString("leadActors").split(",");
-      //Since it's unused, release corresponding memory
       ImageView coverV = findViewById(R.id.cover);
       TextView titleV = findViewById(R.id.name);
       TextView blurbV = findViewById(R.id.blurb);
@@ -275,6 +288,8 @@ public class FilmBookActivity extends AppCompatActivity {
           }
       }
   }
+
+  //set the screen list with the iniliazed screen data
   private LinearLayout setScreensLayout(String data) throws Exception {
     JSONObject screen = new JSONObject(data);
 
@@ -328,7 +343,10 @@ public class FilmBookActivity extends AppCompatActivity {
     return layout;
 
   }
+
+  //when no data available, give some information
   private void showNoData(){
+    screenlist.removeAllViews();
     TextView nodata = new TextView(FilmBookActivity.this);
     LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);
     nodata.setBackgroundColor(Color.parseColor("#ffffff"));

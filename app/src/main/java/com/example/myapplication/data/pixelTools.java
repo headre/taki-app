@@ -3,6 +3,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.TypedValue;
 
+//method to transfer dp into px
 public class pixelTools {
   public static int dip2px(Context context, float dipValue)
   {

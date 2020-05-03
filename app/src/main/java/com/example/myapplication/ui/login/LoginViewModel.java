@@ -37,13 +37,13 @@ public class LoginViewModel extends ViewModel {
 
         if (result instanceof Result.Success) {
             LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            //更改原model使登入用户模型包含获取到的cookie
             loginResult.setValue(new LoginResult(new LoggedInUserView(data.getUserId(),data.getDisplayName())));
         } else {
             loginResult.setValue(new LoginResult(R.string.login_failed));
         }
     }
 
+    //different login types(phone or email), different format standard for input
     public void loginDataChanged(String username, String password) {
         if(type==0) {
             if (!isUserNameValid(username)) {
@@ -73,7 +73,6 @@ public class LoginViewModel extends ViewModel {
     }
 
     // A placeholder password validation check
-    //这里为了测试管理员的6位数pwd密码，先设定为length>5
     private boolean isPasswordValid(String password) {
         return password != null && password.trim().length() > 5;
     }

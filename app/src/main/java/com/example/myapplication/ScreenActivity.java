@@ -50,6 +50,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+/**this is the activity to show hot-showing movies
+ * it will generate widgets according to how many data it receives
+ * it will refresh when the user scroll to the head of the page*/
 
 public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -67,6 +70,8 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_screen);
+
+    //initialize widgets
     uButton = findViewById(R.id.user);
     searchButton = findViewById(R.id.search_button);
     cButton = findViewById(R.id.cinema);
@@ -77,15 +82,14 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
 
     final Bitmap[] bitmap = {null};
 
-    //获取本地存储数据
+    //read local cookie
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
-    SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie", "");
     swipeRefreshLayout.setOnRefreshListener(this);
-    //初始化各种数据
+    //initialize the UI
     init();
 
-    //搜索模块
+    //widgets for search
     editText = findViewById(R.id.search_view);
     searchButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -103,16 +107,17 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
       }
     });
 
+    //jump to the cinema( here use init() to refresh)
     cButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent(ScreenActivity.this, FilmActivity.class);
         startActivity(intent);
+        finish();
       }
     });
 
-    //用户界面模块
-
+    //button to jump to the user page( if not logined-without local cookie, jump to login page)
     uButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -125,10 +130,11 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
           intent = new Intent(ScreenActivity.this, LoginActivity.class);
         }
         startActivity(intent);
+        finish();
       }
     });
 
-
+    //jump to hot showing page
     screenButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -137,7 +143,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
     });
   }
 
-  //初始化界面
+    //get the movies data and build UI
   private void init() {
     movielist.removeAllViews();
     Thread t = new Thread(new Runnable() {
@@ -169,6 +175,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
       }
     });
     t.start();
+    //ensure swipe refresh will only be enabled when user is at the top of the page
     scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
       @Override
       public void onScrollChanged() {
@@ -184,6 +191,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
     });
   }
 
+  //function to return a layout with movies data input
   private LinearLayout setMovieLayout(String data) throws Exception {
     JSONObject movieData = new JSONObject(data);
 
@@ -191,28 +199,25 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
     String name = movieData.getString("name");
     String blurb = movieData.getString("blurb");
     String covername = movieData.getString("cover");
-    String director = movieData.getString("director");
-    String duration = movieData.getString("duration");
 
-    //新建最外层layout
+    //build outer layout
     LinearLayout layout = new LinearLayout(ScreenActivity.this);
 
-    //设置相关margin和padding
+    //set margin and padding variables
     int margin = dip2px(ScreenActivity.this, 20);
     int margin10 = pixelTools.dip2px(ScreenActivity.this, 10);
     int lpadding = dip2px(ScreenActivity.this, 1);
     int tpadding = dip2px(ScreenActivity.this, 8);
 
-
+    //set layout params
     LinearLayout.LayoutParams lLayoutlayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dip2px(ScreenActivity.this, 143));
     lLayoutlayoutParams.setMargins(margin, margin10, margin, 0);
     layout.setLayoutParams(lLayoutlayoutParams);
-    // 设置属性
     layout.setBackgroundColor(Color.parseColor("#000000"));    //
     layout.setPadding(0, 0, 0, 1);
     layout.setOrientation(LinearLayout.HORIZONTAL);
 
-    //以下为下载图片部分
+    //download the poster
     ImageView cover = new ImageView(ScreenActivity.this);
     LinearLayout.LayoutParams imgViewParams = new LinearLayout.LayoutParams(dip2px(ScreenActivity.this, 108), ViewGroup.LayoutParams.MATCH_PARENT, 4);
     cover.setLayoutParams(imgViewParams);
@@ -239,7 +244,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
       m.start();
     }
 
-    //设置文本
+    //set the movies' text information layout
     LinearLayout movieText = new LinearLayout(ScreenActivity.this);
     LinearLayout.LayoutParams textBox = new LinearLayout.LayoutParams(dip2px(ScreenActivity.this, 265), ViewGroup.LayoutParams.MATCH_PARENT);
     movieText.setPadding(tpadding, tpadding, tpadding, tpadding);
@@ -248,6 +253,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
     movieText.setGravity(Gravity.RIGHT);
     movieText.setLayoutParams(textBox);
 
+    //set the movies' text information
     TextView context = new TextView(ScreenActivity.this);
     LinearLayout.LayoutParams contextparams = new LinearLayout.LayoutParams(dip2px(ScreenActivity.this, 250), ViewGroup.LayoutParams.MATCH_PARENT, 8);
     context.setBackgroundColor(Color.parseColor("#ffffff"));
@@ -259,10 +265,11 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
 
     movieText.addView(context);
 
-    //把所有东西塞进layout中
+    //fill up the outer layout
     layout.addView(cover);
     layout.addView(movieText);
 
+    //give the layout a function to jump to the movie detail page when clicked
     layout.setClickable(true);
     layout.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -283,7 +290,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
     return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
   }
 
-
+  //rewrite onRefresh()
   @Override
   public void onRefresh() {
     swipeRefreshLayout.setRefreshing(true);
@@ -297,6 +304,7 @@ public class ScreenActivity extends AppCompatActivity implements SwipeRefreshLay
     }, 1000);
   }
 
+  //when no data available, give some information
   private void showNoData() {
     TextView nodata = new TextView(ScreenActivity.this);
     LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);

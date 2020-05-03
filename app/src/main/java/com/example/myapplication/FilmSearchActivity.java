@@ -24,6 +24,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**this is the activity for users to search movies and show search results*/
+
 public class FilmSearchActivity extends AppCompatActivity {
     private Button Button,cinemaButton,userButton,screenButton,searchButton;
     private String keyword,resultList;
@@ -34,6 +36,8 @@ public class FilmSearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_film_search);
+
+        //initialize widgets
         cinemaButton = findViewById(R.id.cinema);
         userButton = findViewById(R.id.user);
         screenButton = findViewById(R.id.screen);
@@ -42,7 +46,7 @@ public class FilmSearchActivity extends AppCompatActivity {
         editText = findViewById(R.id.search_view);
         resultDisplayList = findViewById(R.id.results_list);
 
-
+        //if search function is called in other pages, read the keyword first
         keyword = getIntent().getStringExtra("keyword");
         editText.setText(keyword);
 
@@ -52,6 +56,7 @@ public class FilmSearchActivity extends AppCompatActivity {
                 //return
                 Intent intent = new Intent(FilmSearchActivity.this, FilmActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -62,6 +67,7 @@ public class FilmSearchActivity extends AppCompatActivity {
                 //return
                 Intent intent = new Intent(FilmSearchActivity.this, FilmActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -71,6 +77,7 @@ public class FilmSearchActivity extends AppCompatActivity {
                 //return
                 Intent intent = new Intent(FilmSearchActivity.this, FilmUserActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -79,9 +86,11 @@ public class FilmSearchActivity extends AppCompatActivity {
           public void onClick(View v) {
             Intent  intent = new Intent(FilmSearchActivity.this,ScreenActivity.class);
             startActivity(intent);
+            finish();
           }
         });
 
+        //call search method
         searchButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
@@ -92,12 +101,14 @@ public class FilmSearchActivity extends AppCompatActivity {
         initResult();
     }
 
+    //initialize the search result
     private void initResult(){
       if(keyword!=null&&keyword!=""){
         showResult();
       }
     }
 
+    //method to search and show the result
     private void showResult(){
       resultDisplayList.removeAllViews();
       if(keyword!=null&&keyword!=""){
@@ -134,6 +145,8 @@ public class FilmSearchActivity extends AppCompatActivity {
         t.start();
       }
     }
+
+    //add the movies that corresponds to the keyword into the list
     private void addResult(JSONObject result) throws Exception{
       int margin10 = pixelTools.dip2px(FilmSearchActivity.this,10);
       int margin20 = pixelTools.dip2px(FilmSearchActivity.this,20);
@@ -176,7 +189,7 @@ public class FilmSearchActivity extends AppCompatActivity {
         m.start();
       }
 
-      //设置文本
+      //set layout and texts
       LinearLayout movieText = new LinearLayout(FilmSearchActivity.this);
       LinearLayout.LayoutParams textBox = new LinearLayout.LayoutParams(pixelTools.dip2px(FilmSearchActivity.this,265),ViewGroup.LayoutParams.MATCH_PARENT);
       movieText.setOrientation(LinearLayout.VERTICAL);
@@ -209,6 +222,7 @@ public class FilmSearchActivity extends AppCompatActivity {
           editor.commit();
           Intent intent = new Intent(FilmSearchActivity.this,FilmBookActivity.class);
           startActivity(intent);
+          finish();
         }
       });
     }

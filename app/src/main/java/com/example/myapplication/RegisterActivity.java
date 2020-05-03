@@ -21,6 +21,10 @@ import com.example.myapplication.ui.login.LoginActivity;
 
 import org.json.JSONObject;
 
+/**this is the activity for new users to register
+ * it ask users to send a idcode email to email address first
+ * if idcode is certificated, other information will be able to build the account*/
+
 public class RegisterActivity extends AppCompatActivity {
     private Button button;
     private EditText email, username, password,id_code;
@@ -31,6 +35,8 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        //initialize the widgets
         button=findViewById(R.id.register_return);
         email = findViewById(R.id.email);
         username = findViewById(R.id.username);
@@ -42,6 +48,7 @@ public class RegisterActivity extends AppCompatActivity {
         register_confirm = findViewById(R.id.register_confirm);
         register_confirm.setEnabled(false);
 
+        //email address format check
         email.addTextChangedListener(new TextWatcher() {
           @Override
           public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -67,6 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
           }
         });
 
+        //id code format check
         password.addTextChangedListener(new TextWatcher() {
           @Override
           public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -114,6 +122,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
 
+        //jump to login page
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,6 +133,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+        //call the method to send email
         send_email.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
@@ -150,6 +160,7 @@ public class RegisterActivity extends AppCompatActivity {
           }
         });
 
+        //upload data to register
         register_confirm.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
@@ -176,6 +187,7 @@ public class RegisterActivity extends AppCompatActivity {
       }
     }
 
+    //if unenough data is input, rigister is not allowed
     private void listenOnEditFormat(){
       if(emailOK==1&&pwdOK==1&&idcodeOK==1){
         register_confirm.setEnabled(true);
@@ -184,6 +196,7 @@ public class RegisterActivity extends AppCompatActivity {
       }
     }
 
+    //with different message, print the hints out
     private void checkIfRegisterSuccess(String response) throws Exception{
       JSONObject responseJSON = new JSONObject(response);
       int tips;

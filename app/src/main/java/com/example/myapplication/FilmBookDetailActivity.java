@@ -33,6 +33,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**this is the activity to show the screening data and seats data
+ * it initialize according to the screen id stored in local storage
+ * it shows the seats status and enables users to select
+ * it enables users to select age types
+ * it shows the total price of the seats selected*/
+
 public class FilmBookDetailActivity extends AppCompatActivity implements View.OnClickListener{
   private Button bookButton, freshButton,adult,senior,child;
   private double originalTotalPrice, originalPrice,discountedTotalPrice;
@@ -50,7 +56,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
   private Boolean showDiscount = false;
   TextView showPrice;
 
-
+  //set the types
   public int[] count = new int[3];
   public static Integer[] idB = new Integer[]{R.id.adult, R.id.senior, R.id.child};
   Button[] sButtons = new Button[]{adult, senior, child};
@@ -59,15 +65,19 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_film_book_detail);
+
+    //read local storage for cookie and screen is
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     cookie = sharedPreferences.getString("cookie", "");
     screenId = sharedPreferences.getString("id", "");
+
+    //initialize widgets
     bookButton = findViewById(R.id.book_Dbutton0);
     showPrice = findViewById(R.id.price_total);
 
     UIInit();
 
-
+    //function for age time selecter
     for (x = 0; x < 3; x++) {
       sButtons[x] = findViewById(idB[x]);
     }
@@ -80,13 +90,17 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     count[0]=1;
     sButtons[0].setBackgroundDrawable(getResources().getDrawable(R.drawable.pay1));
 
+    //set return button
     bookButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent(FilmBookDetailActivity.this, FilmActivity.class);
         startActivity(intent);
+        finish();
       }
     });
+
+    //set refresh button
     freshButton = findViewById(R.id.book_refresh);
     freshButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -96,11 +110,14 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     });
   }
 
+  //refresh data when page is reloaded
   @Override
   protected void onResume() {
     super.onResume();
     UIInit();
   }
+
+  //initialize the page
   private void UIInit() {
     Thread t = new Thread(new Runnable() {
       @Override
@@ -127,7 +144,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     });
     t.start();
 
-
+    //a thread to show movie data
     Thread showMovieData = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -161,6 +178,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
 
   }
 
+  //show dialog to users about alert and confirm
   public void dialog(View v) {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -177,7 +195,6 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
             Toast.makeText(FilmBookDetailActivity.this, "Retry", Toast.LENGTH_SHORT).show();
           }
         });
-//            builder.setNegativeButton("cancel", null);
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
@@ -241,7 +258,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
 
   }
 
-
+  //method to send the order of the seats selected
   private void sendOrder() {
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -272,7 +289,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
 
   }
 
-
+  //method to initialize the seats with the size of the auditorium
   private void init(Integer row, Integer col) {
 
     LinearLayout layout = findViewById(R.id.seats);
@@ -283,6 +300,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     layout.addView(buttonBar(col));
   }
 
+  //build a button bar with the number of columns
   private LinearLayout buttonBar(Integer col) {
     LinearLayout line = new LinearLayout(FilmBookDetailActivity.this);
 
@@ -309,6 +327,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     return line;
   }
 
+  //build a new row with the number of rows
   private LinearLayout newRow(Integer row, Integer col) {
     LinearLayout line = new LinearLayout(FilmBookDetailActivity.this);
     line.setId(row);
@@ -320,10 +339,6 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     header.setLayoutParams(textParams);
     header.setText(row.toString());
     line.addView(header);
-    /*
-    if (col < 5) {
-      col = 5;
-    }*/
     for (int i = 0; i < col; i++) {
       Button seat = addSeat(row, i + 1);
       line.addView(seat);
@@ -331,6 +346,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     return line;
   }
 
+  //match seat status according to the seats' position
   private Button addSeat(Integer row, Integer col) {
     Button seat = new Button(FilmBookDetailActivity.this);
     LinearLayout.LayoutParams seatParams = new LinearLayout.LayoutParams(dip2px(FilmBookDetailActivity.this, 33), dip2px(FilmBookDetailActivity.this, 30), 1);

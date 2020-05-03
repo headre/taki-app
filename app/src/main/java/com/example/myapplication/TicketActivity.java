@@ -38,6 +38,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**this is the activity to show the orders of current user who has logined
+ * it will generate widgets according to how many data it receives
+ * it will refresh when the user scroll to the head of the page */
+
 public class TicketActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
     private Button uButton, cButton, screenButton;
     private TextView title, body;
@@ -51,6 +55,8 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket);
+
+        //initialize widgets
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         ticketlist = findViewById(R.id.orders_list);
         scrollView = findViewById(R.id.scroll_view);
@@ -58,23 +64,24 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
         screenButton = findViewById(R.id.screen);
         uButton = findViewById(R.id.user);
 
-        //获取本地存储数据
+        //read local cookie
         SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         cookie = sharedPreferences.getString("cookie", "");
         swipeRefreshLayout.setOnRefreshListener(this);
         init();
 
+        //jump to unreleased movies page
         cButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(TicketActivity.this, FilmActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
-        //用户界面模块
-
+        //button to jump to the user page( if not logined-without local cookie, jump to login page)
         uButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,10 +94,12 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                     intent = new Intent(TicketActivity.this, LoginActivity.class);
                 }
                 startActivity(intent);
+                finish();
             }
         });
 
 
+        //jump to hot showing page
         screenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,12 +108,15 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
             }
         });
     }
+
+    //refresh when it is restarted
     @Override
     protected void onRestart(){
         super.onRestart();
         init();
     }
 
+    //get the orders data and build UI
     private void init() {
         ticketlist.removeAllViews();
         Thread t = new Thread(new Runnable() {
@@ -156,6 +168,8 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
             }
         });
         t.start();
+
+        //ensure swipe refresh will only be enabled when user is at the top of the page
         scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
             @Override
             public void onScrollChanged() {
@@ -172,6 +186,7 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
     }
 
 
+    //function to return a layout with movies data input
     private void addOrder(JSONObject order) throws JSONException {
         Integer id = order.getInt("id");
         String dateString = order.getString("createdAt");
@@ -201,25 +216,24 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 }
 
 
-                //新建最外层layout
+                //build outer layout
                 LinearLayout layout = new LinearLayout(TicketActivity.this);
 
-                //设置相关margin和padding
+                //set margin and padding variables
                 int margin = dip2px(TicketActivity.this, 20);
                 int margin10 = pixelTools.dip2px(TicketActivity.this, 10);
                 int lpadding = dip2px(TicketActivity.this, 1);
                 int tpadding = dip2px(TicketActivity.this, 8);
 
-
+                //set layout params
                 LinearLayout.LayoutParams lLayoutlayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dip2px(TicketActivity.this, 143));
                 lLayoutlayoutParams.setMargins(margin, margin10, margin, 0);
                 layout.setLayoutParams(lLayoutlayoutParams);
-                // 设置属性
                 layout.setBackgroundColor(Color.parseColor("#000000"));    //
                 layout.setPadding(0, 0, 0, 1);
                 layout.setOrientation(LinearLayout.HORIZONTAL);
 
-                //以下为下载图片部分
+                //download the poster
                 ImageView cover = new ImageView(TicketActivity.this);
                 LinearLayout.LayoutParams imgViewParams = new LinearLayout.LayoutParams(dip2px(TicketActivity.this, 108), ViewGroup.LayoutParams.MATCH_PARENT, 4);
                 cover.setLayoutParams(imgViewParams);
@@ -248,10 +262,11 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 }
 
 
-                //设置文本
+                //set the orders' text information layout
                 LinearLayout movieText = new LinearLayout(TicketActivity.this);
                 LinearLayout.LayoutParams textBox = new LinearLayout.LayoutParams(dip2px(TicketActivity.this, 265), ViewGroup.LayoutParams.MATCH_PARENT);
 
+                //set the orders' text information
                 movieText.setOrientation(LinearLayout.VERTICAL);
                 movieText.setBackgroundColor(Color.parseColor("#000000"));
                 movieText.setGravity(Gravity.RIGHT);
@@ -284,6 +299,7 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                 }
                 context.setText("Total price: " + totalCost + "\n Created at  " + dateS);
 
+                //set the order status
                 TextView status = new TextView(TicketActivity.this);
                 String statusS = "completed";
                 LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
@@ -295,10 +311,13 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                     statusS = "uncompleted";
                     status.setTextColor(Color.parseColor("#ff0000"));
                 }
+
                 status.setTextSize(18);
                 status.setLayoutParams(statusParams);
                 status.setText(statusS);
 
+
+                //give the layout a function to jump to the code detail page when clicked
                 layout.setClickable(true);
                 Boolean finalStatusB = statusB;
                 layout.setOnClickListener(new View.OnClickListener() {
@@ -323,7 +342,7 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
                         movieText.addView(context);
                         movieText.addView(status);
 
-                        //把所有东西塞进layout中
+                        //fill up the outer layout
                         layout.addView(cover);
                         layout.addView(movieText);
                         ticketlist.addView(layout);
@@ -342,6 +361,7 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
     }
 
 
+    //rewrite onRefresh()
     @Override
     public void onRefresh() {
         swipeRefreshLayout.setRefreshing(true);
@@ -355,7 +375,9 @@ public class TicketActivity extends AppCompatActivity implements SwipeRefreshLay
         }, 1000);
     }
 
+    //when no data available, give some information
     private void showNoData() {
+        ticketlist.removeAllViews();
         TextView nodata = new TextView(TicketActivity.this);
         LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 8);
         nodata.setBackgroundColor(Color.parseColor("#ffffff"));

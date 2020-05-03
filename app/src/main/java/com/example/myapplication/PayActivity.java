@@ -30,6 +30,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**this is the activity to confirm and pay the order
+ * it will read the order id which is stored with key word "recentOrderId" in local storage in advance
+ * it shows the order data
+ * it enables users to confirm or cancel the order*/
+
 public class PayActivity extends AppCompatActivity implements View.OnClickListener {
     private String orderString, orderId, cookie, screenData, movieData, createdTime,father;
     Button wechat, ali, cash, confirm, backReturn, cancel;
@@ -47,6 +52,8 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pay);
+
+        //determine where to back when back is on
         father = getIntent().getStringExtra("father");
         backIntent = new Intent(PayActivity.this,FilmBookDetailActivity.class);
         if(father!=null) {
@@ -58,7 +65,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         orderId = sharedPreferences.getString("recentOrderId", "");
         cookie = sharedPreferences.getString("cookie", "");
 
-
+        //initialize the widgets
         confirm = findViewById(R.id.pay_confirm);
         backReturn = findViewById(R.id.pay_return);
         cancel = findViewById(R.id.pay_cancel);
@@ -68,6 +75,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         Blurb = findViewById(R.id.blurb);
         count_down_V = findViewById(R.id.count_down);
 
+        //call the confirm method
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,6 +101,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
             }
         });
 
+        //call the cancel method
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,6 +109,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
             }
         });
 
+        //call back method
         backReturn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +117,8 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
                 startActivity(intent);
             }
         });
+
+        //select pay method
         for (x = 0; x < 3; x++) {
             sButtons[x] = findViewById(idB[x]);
         }
@@ -119,6 +131,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         init();
     }
 
+    //rewrite click for pay method
     @Override
     public void onClick(View v) {
         for (x = 0; x < 3; x++) {
@@ -139,7 +152,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         }
     }
 
-
+    //initialize order page
     private void init() {
         Thread t = new Thread(new Runnable() {
             @Override
@@ -155,6 +168,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         t.start();
     }
 
+    //cancel method
     private void cancelOrder() {
         Thread t = new Thread(new Runnable() {
             @Override
@@ -176,6 +190,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         finish();
     }
 
+    //method to get the order data
     private void getAllData() throws Exception {
         JSONObject order = new JSONObject(orderString);
         String date;
@@ -277,6 +292,7 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
         });
     }
 
+    //method to count down for automatic cancel
     private void countDown() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         double passedTime = 0;

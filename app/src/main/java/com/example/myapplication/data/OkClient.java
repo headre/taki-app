@@ -43,6 +43,8 @@ public class OkClient {
     private static OkHttpClient okHttpClient = new OkHttpClient();
     private String url, result = new String(), cookie = "";
     private Integer rowMax = 0, colMax = 0;
+
+    //agree all possible https connect
     private static SSLSocketFactory createSSLSocketFactory() {
         SSLSocketFactory ssfFactory = null;
         try {
@@ -68,23 +70,20 @@ public class OkClient {
 
         okHttpClient = builder.build();
     }
+
     public OkClient() {
         this.url = "https://106.12.203.34:8443/";
     }
-
     public OkClient(String cookie) {
         this.url = "https://106.12.203.34:8443/";
         this.cookie = cookie;
     }
-
     private void ResetUrl() {
         this.url = "https://106.12.203.34:8443/";
     }
-
     public String getResult() {
         return result;
     }
-
     public String getCookie() {
         if (cookie == null || cookie == "") {
             return "cookie is empty";
@@ -121,34 +120,8 @@ public class OkClient {
         return result;
     }
 
-    public String getMoviesData() {
-        try {
-            setMode("movies");
-            result = new JSONObject(result).getString("content");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public String getScreensData() {
-        try {
-            setMode("screenings");
-            result = new JSONObject(result).getString("content");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
     public String getScreenInfo(String id) {
         url += "screenings/" + id;
-        setMode("default");
-        return getResult();
-    }
-
-    public String getMovieScreen(String id) {
-        url += "movies/" + id;
         setMode("default");
         return getResult();
     }
@@ -159,15 +132,6 @@ public class OkClient {
         return getResult();
     }
 
-    public void setMode(String mode, String id) {
-        url += mode;
-        url += "/" + id;
-        if (mode == "movies") {
-            url += "/info";
-        }
-        mode = "withid";
-        setMode(mode);
-    }
 
     public void setMode(String mode, String username, String password) {
         switch (mode) {
@@ -187,7 +151,7 @@ public class OkClient {
 
 
 
-    //登录模块
+    //login method
     public void login(String username, String password) {
         okHttpClient = new OkHttpClient.Builder().cookieJar(new CookieJar() {
             private final HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
@@ -230,11 +194,11 @@ public class OkClient {
         }
     }
 
-    //获取电影列表模块
+    //get all movies(number of 20)
     private void getMovies() {
         final Request request = new Request.Builder()
                 .url(url + "?s=20")
-                .get()//默认就是GET请求
+                .get()
                 .build();
         try {
             result = okHttpClient.newCall(request).execute().body().string();
@@ -243,11 +207,11 @@ public class OkClient {
         }
     }
 
-    //这玩意好像和上面那个是同一个东西
+    //get all possible screenings(number of 20)
     public void getScreenings() {
         final Request request = new Request.Builder()
                 .url(url + "?s=20")
-                .get()//默认就是GET请求
+                .get()
                 .build();
         try {
             result = okHttpClient.newCall(request).execute().body().string();
@@ -256,15 +220,8 @@ public class OkClient {
         }
     }
 
-    /**
-     * public void getMovieIdFromScreen(String screenId){
-     * okHttpClient = new OkHttpClient();
-     * setMode("movies",screenId);
-     * <p>
-     * }
-     */
 
-    //上传选座信息
+    //send the seats user selected
     public String sendTicket(ArrayList<String> ticketsList, String cookie, String screenId) throws IOException {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, ticketsList.toString());
@@ -279,6 +236,7 @@ public class OkClient {
         return result;
     }
 
+    //pay the order
     public void payOrder(String cookie) throws IOException {
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
@@ -291,6 +249,7 @@ public class OkClient {
         Log.e("confirm response", result);
     }
 
+    //cancel the order
     public void cancelOrder(String cookie) throws IOException {
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
@@ -303,6 +262,7 @@ public class OkClient {
         Log.e("cancel response", result);
     }
 
+    //get the order information by id
     public String getOrder(String id) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "orders/" + id)
@@ -314,7 +274,7 @@ public class OkClient {
 
     }
 
-
+    //get all possible orders of the user
     public String getOrders(String cookie) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "users/orders")
@@ -324,6 +284,7 @@ public class OkClient {
         return result;
     }
 
+    //download the image file by filename(stored in database)
     public Bitmap getImg(String name) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "file/" + name)
@@ -335,6 +296,7 @@ public class OkClient {
         return bitmap;
     }
 
+    //get search result of movies
     public String getSearch(String keyword) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "movies/search?q=" + keyword)
@@ -343,6 +305,7 @@ public class OkClient {
         return result;
     }
 
+    //get search result of screenings(by date)
     public String screenSearch(String date, @Nullable String movie, @Nullable Integer page, @Nullable Integer contentCount) {
         if (movie == null) {
             movie = "";
@@ -371,7 +334,7 @@ public class OkClient {
         return result;
     }
 
-    //获取影厅可用的所有座位
+    //get all possible seats of the selected screening(with a specific auditorium id)
     public ArrayList<HashMap> GetAllSeat(String auditoriumId) {
         ArrayList<HashMap> seats = new ArrayList<>();
         //OkHttpClient client = new OkHttpClient().newBuilder().build();
@@ -403,7 +366,7 @@ public class OkClient {
         return seats;
     }
 
-    //获取需要建立的影厅尺寸
+    //get the size of the auditoirum
     public JSONObject getSize() throws Exception {
         JSONObject size = new JSONObject();
         size.put("row", this.rowMax);
@@ -411,7 +374,7 @@ public class OkClient {
         return size;
     }
 
-    //获取当前排片被占用的座位
+    //get current screenings' seats which are taken already
     public ArrayList<HashMap> seatTaken(String screenId) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "tickets/screenings/" + screenId)
@@ -438,7 +401,7 @@ public class OkClient {
         return seats;
     }
 
-    //通过screenId获取博放映厅的编号id
+    //get the auditorium id by the screening id
     public String getAuditoruimId(String screenId) throws Exception {
         Request request = new Request.Builder()
                 .get()
@@ -450,6 +413,7 @@ public class OkClient {
         return id;
     }
 
+    //method of logout(need cookie)
     public void logout() throws IOException {
         Request request = new Request.Builder()
                 .get()
@@ -460,6 +424,7 @@ public class OkClient {
         Log.e("response", result);
     }
 
+    //get the seats information by seat id
     public String getSeatsPosition(Integer id) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "seats/" + id)
@@ -469,6 +434,7 @@ public class OkClient {
         return result;
     }
 
+    //register method( with username, email address, password, id code of the email)
     public String register(String username, String email, String password, String id_code) throws Exception {
         MediaType mediaType = MediaType.parse("application/json");
         JSONObject jsonObject = new JSONObject();
@@ -488,6 +454,7 @@ public class OkClient {
         return result;
     }
 
+    //method to send id code to email( need email address in String)
     public String sendIdCode(String email) throws Exception {
         MediaType mediaType = MediaType.parse("application/json");
         JSONObject jsonObject = new JSONObject();
@@ -503,6 +470,7 @@ public class OkClient {
         return result;
     }
 
+    //refund the ticket selected(by ticket id)
     public String refund(Integer id) throws Exception {
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
@@ -517,8 +485,8 @@ public class OkClient {
         return result;
     }
 
+    //send the ticket( .pdf) to email of the user
     public String sendTicketToEmail(File file) throws Exception {
-        //OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("title", "Your ticket")
@@ -537,6 +505,7 @@ public class OkClient {
         return result;
     }
 
+    //get the auditorium's information by auditorium id
     public String getAuditoriumInfo(String id) throws Exception {
         Request request = new Request.Builder()
                 .url(url + "auditoriums/" + id)
@@ -546,6 +515,7 @@ public class OkClient {
         return result;
     }
 
+    //send message to the phone number
     public void sendMessage(String tel_number) throws Exception{
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("number",tel_number);

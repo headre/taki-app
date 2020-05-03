@@ -42,20 +42,21 @@ public class LoginActivity extends AppCompatActivity {
     public  int tag_P=1,tag_E=0;
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //跳过登录部分
+
+        //skip login when logined
         SharedPreferences sharedPreferences = getSharedPreferences("login",MODE_PRIVATE);
         String cookie = sharedPreferences.getString("cookie","");
         final Intent intent=new Intent(LoginActivity.this, FilmActivity.class);
         if(cookie!=""){
             startActivity(intent);
         }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
          register=findViewById(R.id.register);
-       // register.setMovementMethod(LinkMovementMethod.getInstance());
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,15 +78,18 @@ public class LoginActivity extends AppCompatActivity {
         changeLoginEditText();
     }
 
+    //switch edittexts when email or phone mode is selected
     private void changeLoginEditText(){
         if(tag_P==0&&tag_E==1){
-            setLoginEditText(findViewById(R.id.phone_number),findViewById(R.id.phone_id_code));
+            setLoginEditText(findViewById(R.id.phone_number),findViewById(R.id.phone_id_code));//phone mode
             loginViewModel.setType(tag_E);
         }else if(tag_E==0&&tag_P==1){
-            setLoginEditText(findViewById(R.id.username),findViewById(R.id.password));
+            setLoginEditText(findViewById(R.id.username),findViewById(R.id.password));//email mode
             loginViewModel.setType(tag_P);
         }
     }
+
+    //apply format and methods to edittexts
     private void setLoginEditText(EditText account,EditText idcode){
         SharedPreferences sharedPreferences = getSharedPreferences("login",MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -120,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                     showLoginFailed(loginResult.getError());
                 }
                 if (loginResult.getSuccess() != null) {
-                    //确认登录成功后完成跳转工作
+                    //finish login and start another acitivity
                     Log.e("cookie",loginResult.getSuccess().getCookie());
                     editor.putString("username",loginResult.getSuccess().getDisplayName());
                     editor.putString("cookie", loginResult.getSuccess().getCookie());
@@ -133,6 +137,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //format watcher
         TextWatcher afterTextChangedListener = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -152,6 +157,8 @@ public class LoginActivity extends AppCompatActivity {
         };
         account.addTextChangedListener(afterTextChangedListener);
         idcode.addTextChangedListener(afterTextChangedListener);
+
+        //different operations lead to the same login method
         idcode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
@@ -175,6 +182,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    //send message with id code to phone
     public void sendMessage(View view){
         Thread t = new Thread(new Runnable() {
             @Override
@@ -199,7 +207,9 @@ public class LoginActivity extends AppCompatActivity {
         });
         t.start();
     }
- public void login_P(View view)
+
+    //change login mode
+    public void login_P(View view)
     {
         change_P();
     }
@@ -207,7 +217,6 @@ public class LoginActivity extends AppCompatActivity {
     {
         change_E();
     }
-
     public void change_P() {
         if (tag_P == 0) {
             LinearLayout off = findViewById(R.id.input_phone);
@@ -218,7 +227,6 @@ public class LoginActivity extends AppCompatActivity {
         }
         changeLoginEditText();
     }
-
     public void change_E() {
         if (tag_E == 0) {
             LinearLayout off = findViewById(R.id.input_email);
@@ -229,6 +237,8 @@ public class LoginActivity extends AppCompatActivity {
         }
         changeLoginEditText();
     }
+
+
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience

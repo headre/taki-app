@@ -36,6 +36,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+/**this is the activity to display user page
+ * it enables users to logout
+ * it provides the button to show the orders of the user*/
 
 public class FilmUserActivity extends AppCompatActivity {
   private Button userButton, screenButton, cinemaButton, logoutButton, refundButton,mailButton,ordersButton;
@@ -51,6 +54,8 @@ public class FilmUserActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_film_user);
+
+    //initialize widgets
     screenButton = findViewById(R.id.screen);
     userButton = findViewById(R.id.user);
     cinemaButton = findViewById(R.id.cinema);
@@ -62,12 +67,13 @@ public class FilmUserActivity extends AppCompatActivity {
     orders = findViewById(R.id.orders);
     logoutButton = findViewById(R.id.logout);
 
-
+    //read cookie and username stored in local storage
     SharedPreferences sharedPreferences = getSharedPreferences("login", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     cookie = sharedPreferences.getString("cookie", "");
     usernameV.setText(sharedPreferences.getString("username",""));
 
+    //jump to orders list page
     ordersButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -76,6 +82,7 @@ public class FilmUserActivity extends AppCompatActivity {
       }
     });
 
+    //send mail
     mailButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -103,11 +110,14 @@ public class FilmUserActivity extends AppCompatActivity {
         }
       }
     });
+
+    //jump to hot-showing page
     screenButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent(FilmUserActivity.this, ScreenActivity.class);
         startActivity(intent);
+        finish();
       }
     });
 
@@ -121,18 +131,21 @@ public class FilmUserActivity extends AppCompatActivity {
           intent = new Intent(FilmUserActivity.this, LoginActivity.class);
         }
         startActivity(intent);
+        finish();
       }
     });
 
+    //jump to unreleased movies page
     cinemaButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent(FilmUserActivity.this, FilmActivity.class);
         startActivity(intent);
+        finish();
       }
     });
 
-
+    //logout
     logoutButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -170,6 +183,7 @@ public class FilmUserActivity extends AppCompatActivity {
     init();
   }
 
+  //initialize data and UI page
   private void init() {
     Thread t = new Thread(new Runnable() {
       @Override
@@ -205,6 +219,7 @@ public class FilmUserActivity extends AppCompatActivity {
     t.start();
   }
 
+  //method to add order into order list
   private void addOrder(JSONObject order) throws Exception {
     final int[] click = {0};
 
@@ -386,7 +401,7 @@ public class FilmUserActivity extends AppCompatActivity {
     });
   }
 
-  //根据票的放映日期判断是否可以退票
+  //determine if refund is allowable by date
   private Boolean refundOk(String date) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Boolean avail = false;
@@ -404,6 +419,7 @@ public class FilmUserActivity extends AppCompatActivity {
     return avail;
   }
 
+  //method to refund tickets
   private void refundTickets() {
     if (refund==0) {
       String tips = "You haven't chosen any tickets";
@@ -448,7 +464,7 @@ public class FilmUserActivity extends AppCompatActivity {
     }
 
 
-
+    //output the pdf
   @RequiresApi(api = Build.VERSION_CODES.KITKAT)
   private void pdfModel(LinearLayout layout) throws  Exception{
     String path = getApplicationContext().getFilesDir().getPath();

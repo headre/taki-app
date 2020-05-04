@@ -192,7 +192,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
           @Override
           public void onClick(DialogInterface dialog, int which) {
-            Toast.makeText(FilmBookDetailActivity.this, "Retry", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(FilmBookDetailActivity.this, "Retry", Toast.LENGTH_SHORT).show();
           }
         });
 
@@ -310,6 +310,7 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     header.setTextSize(15);
     header.setBackgroundResource(R.color.grey);
     header.setLayoutParams(textParams);
+    header.setText(" ");
     line.addView(header);
 
     Character pos = 'A';
@@ -335,6 +336,9 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dip2px(FilmBookDetailActivity.this, 43));
     header.setGravity(Gravity.CENTER);
     header.setTextSize(15);
+    if(row>=10){
+      header.setTextSize(7);
+    }
     header.setBackgroundResource(R.drawable.shape_screen);
     header.setLayoutParams(textParams);
     header.setText(row.toString());

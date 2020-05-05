@@ -104,12 +104,6 @@
                                 android:layout_marginRight="0dp"
                                 android:background="#f1f1f1"
                                 android:orientation="vertical">
-                                <LinearLayout
-                                    android:layout_width="800dp"
-                                    android:layout_height="30dp"
-                                    android:background="#000000">
-
-                                </LinearLayout>
 
                             </LinearLayout>
 

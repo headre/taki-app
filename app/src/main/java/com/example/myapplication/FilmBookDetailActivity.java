@@ -310,10 +310,9 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     header.setTextSize(15);
     header.setBackgroundResource(R.color.grey);
     header.setLayoutParams(textParams);
-    header.setText(" ");
+    header.setText("  ");
     line.addView(header);
 
-    Character pos = 'A';
     for (int i = 0; i < col; i++) {
       TextView seat = new TextView(FilmBookDetailActivity.this);
       LinearLayout.LayoutParams seatParams = new LinearLayout.LayoutParams(dip2px(FilmBookDetailActivity.this, 33), dip2px(FilmBookDetailActivity.this, 20), 1);
@@ -321,9 +320,8 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
       seat.setBackgroundResource(R.drawable.shape_screen);
       seat.setGravity(Gravity.CENTER);
       seat.setLayoutParams(seatParams);
-      seat.setText(pos.toString());
+      seat.setText(String.valueOf(i+1));
       line.addView(seat);
-      pos++;
     }
     return line;
   }
@@ -336,12 +334,11 @@ public class FilmBookDetailActivity extends AppCompatActivity implements View.On
     LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dip2px(FilmBookDetailActivity.this, 43));
     header.setGravity(Gravity.CENTER);
     header.setTextSize(15);
-    if(row>=10){
-      header.setTextSize(7);
-    }
+    Character pos = 'A';
+    int a = (int)pos+row-1;
     header.setBackgroundResource(R.drawable.shape_screen);
     header.setLayoutParams(textParams);
-    header.setText(row.toString());
+    header.setText(String.valueOf((char)a));
     line.addView(header);
     for (int i = 0; i < col; i++) {
       Button seat = addSeat(row, i + 1);

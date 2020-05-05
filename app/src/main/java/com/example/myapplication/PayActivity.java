@@ -232,11 +232,11 @@ public class PayActivity extends AppCompatActivity implements View.OnClickListen
                             Integer seatId = ticket.getInt("seatId");
                             String seat = new OkClient(cookie).getSeatsPosition(seatId);
                             JSONObject pos = new JSONObject(seat);
-                            Character rol = 'A';
-                            for (int m = 0; m < pos.getInt("col"); m++) {
-                                rol++;
+                            Character row = 'A';
+                            for (int m = 0; m < pos.getInt("row"); m++) {
+                                row++;
                             }
-                            String seatPos = "row " + pos.getString("row") + " , col " + rol;
+                            String seatPos = "row " + row + " , col " + pos.getString("col");
                             infoDetails += "seat: " + seatPos + "\n";
                         }
                         Log.e("info", infoDetails);

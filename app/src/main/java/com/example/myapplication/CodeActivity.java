@@ -175,11 +175,11 @@ public class CodeActivity extends AppCompatActivity {
                             String seat = new OkClient(cookie).getSeatsPosition(seatId);
                             String validation = ticket.getString("validation");
                             JSONObject pos = new JSONObject(seat);
-                            Character rol = 'A';
-                            for (int m = 0; m < pos.getInt("col"); m++) {
-                                rol++;
+                            Character row = 'A';
+                            for (int m = 0; m < pos.getInt("row"); m++) {
+                                row++;
                             }
-                            String seatPos = "row " + pos.getString("row") + " , col " + rol;
+                            String seatPos = "row " + row + " , col " + pos.getString("col");
                             infoDetails += "seat: " + seatPos + "\n";
 
 

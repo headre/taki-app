@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
-
+        loginViewModel.setType(tag_E);
          register=findViewById(R.id.register);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
             loginViewModel.setType(tag_E);
         }else if(tag_E==0&&tag_P==1){
             setLoginEditText(findViewById(R.id.username),findViewById(R.id.password));//email mode
-            loginViewModel.setType(tag_P);
+            loginViewModel.setType(tag_E);
         }
     }
 
